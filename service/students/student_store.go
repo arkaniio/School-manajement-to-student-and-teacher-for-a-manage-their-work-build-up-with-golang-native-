@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
@@ -183,5 +184,113 @@ func (s *StudentStore) GetAllStudents(
 
 	//return final result
 	return students, nil
+
+}
+
+//func to update their student
+func (s *StudentStore) UpdateStudent(
+	id uuid.UUID,
+	ctx context.Context,
+	payload types.UpdateAsStudent,
+) error {
+
+	//make the options for a options of transaction
+	options := &sql.TxOptions{
+		ReadOnly: false,
+		Isolation: sql.LevelSerializable,
+	}
+
+	//setup the transaction
+	tx, err := s.db.BeginTxx(ctx, options)
+	if err != nil {
+		return errors.New("Failed to get the transactrion!" + err.Error())
+	}
+
+	//setup to join the query for a settings and dll
+	var settings_query []string 
+	var args []interface{}
+	var argID = 1
+
+	//if the students wants to update their name
+	if payload.Name != nil {
+		settings_query = append(settings_query, fmt.Sprintf("name=$%d", argID))
+		args = append(args, payload.Name)
+		argID++
+	}
+
+	//if the students wants to update their class
+	if payload.Class != nil {
+		settings_query = append(settings_query, fmt.Sprintf("class=$%d", argID))
+		args = append(args, payload.Class)
+		argID++
+	}
+
+	//if the students wants to update their address
+	if payload.Address != nil {
+		settings_query = append(settings_query, fmt.Sprintf("address=$%d", argID))
+		args = append(args, payload.Address)
+		argID++
+	}
+
+	//if the students wants to update their student_profile
+	if payload.StudentProfile != nil {
+		settings_query = append(settings_query, fmt.Sprintf("student_profile=$%d", argID))
+		args = append(args, payload.StudentProfile)
+		argID++
+	}
+
+	//if students wants to update their major 
+	if payload.Major != nil {
+		settings_query = append(settings_query, fmt.Sprintf("major=$%d", argID))
+		args = append(args, payload.Major)
+		argID++
+	}
+
+	//update the updated at
+	settings_query = append(settings_query, fmt.Sprintf("updated_at=$%d", argID))
+	args = append(args, payload.Updated_at)
+	argID++
+
+	//set the full query
+	full_query := fmt.Sprintf("UPDATE students SET %s WHERE id = $%d", strings.Join(settings_query, ", "), argID)
+	args = append(args, full_query)
+
+	//execute the query 
+	if result, err := tx.ExecContext(ctx, full_query, args...); err != nil {
+		rows, err := result.RowsAffected() 
+		if err != nil {
+			return errors.New("Failed to detect the rows in the db!" + err.Error())
+		}
+		if rows == 0 {
+			return errors.New("No one rows detected !")
+		}
+		return errors.New("Failed to execute the query")
+	}
+
+	//return the error
+	return nil
+
+}
+
+//func to get the student by id
+func (s *StudentStore) GetStudentById(id uuid.UUID, ctx context.Context) (*types.Student, error) {
+
+	//base query
+	query := `
+		SELECT id, name, class, address, major, student_profile, created_at, updated_at
+		WHERE id = $1
+	`
+
+	//execute the query
+	var students types.Student
+	if err := s.db.GetContext(ctx, students, query, id); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("Failed error no rows detected")
+		}
+		return nil, nil
+	}
+
+	//return final result
+	return &students, nil
 
 }

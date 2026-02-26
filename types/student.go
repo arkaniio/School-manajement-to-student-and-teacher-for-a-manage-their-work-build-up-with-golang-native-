@@ -18,6 +18,8 @@ type StudentStore interface {
 		cursorValue any,
 		cursorID string,
 		) ([]Student, error)
+	GetStudentById(id uuid.UUID, ctx context.Context) (*Student, error)
+	UpdateStudent(id uuid.UUID, ctx context.Context, payload UpdateAsStudent) error
 }
 
 type Student struct {
@@ -44,11 +46,11 @@ type RegisterAsStudent struct {
 
 type UpdateAsStudent struct {
 	Id 				uuid.UUID 		`json:"id"`
-	Name 			string 			`json:"name"`
-	Class 			string 			`json:"class"`
-	Address 		string 			`json:"address"`
-	Major 			string 			`json:"major"`
-	StudentProfile 	string 			`json:"student_profile"`
+	Name 			*string 		`json:"name"`
+	Class 			*string 		`json:"class"`
+	Address 		*string 		`json:"address"`
+	Major 			*string 		`json:"major"`
+	StudentProfile 	*string 		`json:"student_profile"`
 	Created_at 		time.Time 		`json:"created_at"`
 	Updated_at 		time.Time 		`json:"updated_at"`
 }
