@@ -36,34 +36,34 @@ func (h *HandleRequest) Register_Bp(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetRequestID(r)
 	if requestID == "" {
 		//logger the data response if request id is zero value
-		logger.Log.Info("Failed to get the request id", 
+		logger.Log.Info("Failed to get the request id",
 			zap.String("client_ip", r.RemoteAddr),
 			zap.String("path", r.URL.Path),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to detect the request id!", false)
-		return 
+		return
 	}
 
 	//create the payload of the json
 	var payload types.Register
 	if err := utils.DecodeData(r, &payload); err != nil {
 		//logger the data response
-		logger.Log.Error("Failed to decode data", 
+		logger.Log.Error("Failed to decode data",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to decode the data of the json!", err.Error())
-		return 
+		return
 	}
 
 	//validate the email is the right form email
 	is_valid := utils.IsValidEmail(payload.Email)
 	if !is_valid {
-		//logger the data response if is failed 
-		logger.Log.Error("Failed , invalid email type!", 
+		//logger the data response if is failed
+		logger.Log.Error("Failed , invalid email type!",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Invalid email!", false)
 		return
 	}
@@ -89,26 +89,26 @@ func (h *HandleRequest) Register_Bp(w http.ResponseWriter, r *http.Request) {
 	users, err := h.db.GetUserByEmailAndUsername(payload.Email, payload.Username)
 	if err != nil {
 		//logger the data response if get user by username and by email is vailed!
-		logger.Log.Error("Failed to get the username and email", 
+		logger.Log.Error("Failed to get the username and email",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the email and username", err.Error())
-		return 
+		return
 	}
 	if users != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "Username and email has been already exist!!", false)
 		return
 	}
 
-	//hash the password user for a better security 
+	//hash the password user for a better security
 	hash_password, err := utils.HashPassword(payload.Password)
 	if err != nil {
 		//logger the data response if hash password is failed
-		logger.Log.Error("Failed to hash the password", 
+		logger.Log.Error("Failed to hash the password",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)	
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to hash the password of the data user!", err.Error())
 		return
 	}
@@ -119,41 +119,41 @@ func (h *HandleRequest) Register_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//parsing the payload into a struct in the db
 	final_payload := &types.User{
-		Id: uuid.New(),
-		Username: payload.Username,
-		Email: payload.Email,
-		Password: hash_password,
+		Id:            uuid.New(),
+		Username:      payload.Username,
+		Email:         payload.Email,
+		Password:      hash_password,
 		Profile_Image: payload.Profile_Image,
-		Role: payload.Role,
-		Created_at: payload.Created_at,
-		Updated_at: payload.Updated_at,
+		Role:          payload.Role,
+		Created_at:    payload.Created_at,
+		Updated_at:    payload.Updated_at,
 	}
 
 	//create a new user with the registration
-	ctx, cancle := context.WithTimeout(r.Context(), time.Second * 10)
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
 
 	//execute the query
 	if err := h.db.CreateUser(ctx, final_payload); err != nil {
 		//logger the data response if create user is failed
-		logger.Log.Error("Failed to create new user", 
+		logger.Log.Error("Failed to create new user",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)	
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to create a new user", err.Error())
 		return
 	}
 
 	//parsing into a user response in types user
 	users_response := types.UserResponse{
-		Id: final_payload.Id,
-		Username: final_payload.Username,
-		Email: final_payload.Email,
-		Password: final_payload.Password,
+		Id:            final_payload.Id,
+		Username:      final_payload.Username,
+		Email:         final_payload.Email,
+		Password:      final_payload.Password,
 		Profile_Image: final_payload.Profile_Image,
-		Role: final_payload.Role,
-		Created_at: time_created,
-		Updated_at: time_updated,
+		Role:          final_payload.Role,
+		Created_at:    time_created,
+		Updated_at:    time_updated,
 	}
 
 	//return a response success
@@ -161,28 +161,28 @@ func (h *HandleRequest) Register_Bp(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//controller services for handling the router login
+// controller services for handling the router login
 func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//make the request id from this func
 	requestID := middleware.GetRequestID(r)
 	if requestID == "" {
-		logger.Log.Info("Failed to get request!", 
+		logger.Log.Info("Failed to get request!",
 			zap.String("client_ip", r.RemoteAddr),
 			zap.String("path", r.URL.Path),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the request id!", false)
-		return 
+		return
 	}
 
 	//decode the payload of the struct into a json structure
 	var payload types.Login
 	if err := utils.DecodeData(r, &payload); err != nil {
 		//logger the data response if the decode data is failed
-		logger.Log.Error("Failed to decode the payload data", 
+		logger.Log.Error("Failed to decode the payload data",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)	
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to decode the payload of the login struct!", err.Error())
 		return
 	}
@@ -191,10 +191,10 @@ func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 	is_valid := utils.IsValidEmail(payload.Email)
 	if !is_valid {
 		//logger the data response if the email is invalid
-		logger.Log.Error("Failed , invalid email type!", 
+		logger.Log.Error("Failed , invalid email type!",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Invalid email!", false)
 		return
 	}
@@ -217,28 +217,28 @@ func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//check the email and username (exist or not found)
-	users, err := h.db.GetUserByEmailAndUsername(payload.Email, payload.Username) 
+	users, err := h.db.GetUserByEmailAndUsername(payload.Email, payload.Username)
 	if err != nil {
 		//logger the data response if failed to get email and username by users
-		logger.Log.Error("Failed to get user by username and email", 
+		logger.Log.Error("Failed to get user by username and email",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get email and username from db!", err.Error())
-		return 
+		return
 	}
 	if users == nil {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get email and username, nill result", false)
-		return 
+		return
 	}
-	
+
 	//compare the password
 	if err := utils.ComparePassword(users.Password, payload.Password); err != nil {
-		//logger the data response if the compare password is failed 
-		logger.Log.Error("Failed to compare the password", 
+		//logger the data response if the compare password is failed
+		logger.Log.Error("Failed to compare the password",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to compare the password!", err.Error())
 		return
 	}
@@ -247,12 +247,12 @@ func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 	token, refresh_token, err := utils.GenerateJwt(users.Id, users.Username, users.Email, users.Role)
 	if err != nil {
 		//logger the data response if the generate jwt is failed
-		logger.Log.Error("Failed to generate the jwt !", 
+		logger.Log.Error("Failed to generate the jwt !",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to create a new token from that function", err.Error())
-		return 
+		return
 	}
 	if token == "" && refresh_token == "" {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to detect the token and refresh token!", false)
@@ -262,10 +262,10 @@ func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 	//make the response of the login bp
 	response_users := make(map[string]interface{})
 	response_users["data"] = map[string]interface{}{
-		"email": users.Email,
-		"username": users.Username,
-		"role": users.Role,
-		"token": token,
+		"email":         users.Email,
+		"username":      users.Username,
+		"role":          users.Role,
+		"token":         token,
 		"refresh_token": refresh_token,
 	}
 
@@ -273,59 +273,59 @@ func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseSuccess(w, http.StatusOK, "Login has been successfully!", response_users)
 }
 
-//router to get the profile of the user
+// router to get the profile of the user
 func (h *HandleRequest) Profile_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//get the request id from this func
 	requestID := middleware.GetRequestID(r)
 	if requestID == "" {
 		//logger the data response if the request id value is zero
-		logger.Log.Info("Failed to get the request id!", 
+		logger.Log.Info("Failed to get the request id!",
 			zap.String("client_id", r.RemoteAddr),
 			zap.String("path", r.URL.Path),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the request id!", false)
-		return 
+		return
 	}
 
 	//get user id from token
 	user_id, err := middleware.GetIdMiddleware(w, r)
 	if err != nil {
 		//logger the data response if failed to get the user_id!
-		logger.Log.Error("Failed to get the user id from token header!", 
+		logger.Log.Error("Failed to get the user id from token header!",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the user id!", err.Error())
-		return 
+		return
 	}
 	if user_id == uuid.Nil {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the user id!", false)
-		return 
+		return
 	}
 
 	//settings the query from store
 	users, err := h.db.GetUserById(user_id)
 	if err != nil {
 		//logger the data response if get user by id is failed
-		logger.Log.Error("Failed to get user by id!", 
+		logger.Log.Error("Failed to get user by id!",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the user by id!", err.Error())
-		return 
+		return
 	}
 	if users == nil {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to detect the data from db because the nil result!", false)
-		return 
+		return
 	}
 
 	//response the json
 	response_user := make(map[string]interface{})
 	response_user = map[string]interface{}{
 		"username": users.Username,
-		"email": users.Email,
-		"role": users.Role,
+		"email":    users.Email,
+		"role":     users.Role,
 	}
 
 	//return final result
@@ -333,19 +333,19 @@ func (h *HandleRequest) Profile_Bp(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func that update the users data or profile_image
+// func that update the users data or profile_image
 func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//get the request id from this func
 	requestID := middleware.GetRequestID(r)
 	if requestID == "" {
 		//logger the data response if the request id value is zero!
-		logger.Log.Info("Failed to get the request id!", 
+		logger.Log.Info("Failed to get the request id!",
 			zap.String("client_ip", r.RemoteAddr),
 			zap.String("path", r.URL.Path),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the request id!", false)
-		return 
+		return
 	}
 
 	//declare the id of the parameters
@@ -354,25 +354,25 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 	user_id, err := uuid.Parse(id)
 	if err != nil {
 		//logger the data response if the uuid parse is failed
-		logger.Log.Error("Failed to convert data into an uuid!", 
+		logger.Log.Error("Failed to convert data into an uuid!",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to convert data string into a uuid type!", err.Error())
-		return 
+		return
 	}
 	if user_id == uuid.Nil {
 		utils.ResponseError(w, http.StatusBadRequest, "Invalid uuid type!", false)
-		return 
+		return
 	}
 
 	//declare the form validaton for the size of the file image
-	r.Body = http.MaxBytesReader(w, r.Body, 2 << 20)
+	r.Body = http.MaxBytesReader(w, r.Body, 2<<20)
 
 	//parse multipart form to setting the request is the form file
 	if err := r.ParseMultipartForm(2 << 20); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to parse the multipart form data for a request!", err.Error())
-		return 
+		return
 	}
 
 	//declare the form value for each field in db
@@ -384,14 +384,14 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 	//declare the form file for profile image
 	file_image, header, err := r.FormFile("profile_image")
 	if err != nil {
-		//logger the data response 
-		logger.Log.Error("Failed to get the profile image", 
+		//logger the data response
+		logger.Log.Error("Failed to get the profile image",
 			zap.String("request_id", requestID),
 			zap.String("client_ip", r.RemoteAddr),
-	)
+		)
 		if err != http.ErrMissingFile {
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to detect profile image!", err.Error())
-			return 
+			return
 		}
 	}
 	if err == nil {
@@ -400,12 +400,12 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 		read_buff, err := file_image.Read(buff)
 		if err != nil {
 			//logger the data response if the read file image is failed
-			logger.Log.Error("Failed to read image file", 
+			logger.Log.Error("Failed to read image file",
 				zap.String("request_id", requestID),
 				zap.String("client_ip", r.RemoteAddr),
-		)
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to read the image file!", err.Error())
-			return 
+			return
 		}
 		if read_buff == 0 {
 			utils.ResponseError(w, http.StatusBadRequest, "Invalid lenght of the file data!", false)
@@ -414,10 +414,10 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 		type_content := http.DetectContentType(buff)
 		if type_content != "image/jpg" && type_content != "image/png" && type_content != "image/jpeg" {
 			//logger the data response if the type of image is failed
-			logger.Log.Error("Failed because the image file is invalid!", 
+			logger.Log.Error("Failed because the image file is invalid!",
 				zap.String("request_id", requestID),
 				zap.String("client_ip", r.RemoteAddr),
-		)
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed content file type!", false)
 			return
 		}
@@ -428,27 +428,27 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 		upload_dir := "uploads_user"
 		if err := os.MkdirAll(upload_dir, os.ModePerm); err != nil {
 			//logger the data response if the make folder is failed
-			logger.Log.Error("Failed!", 
+			logger.Log.Error("Failed!",
 				zap.String("request_id", requestID),
 				zap.String("client_ip", r.RemoteAddr),
-		)
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the mkdir all", err.Error())
-			return 
+			return
 		}
 		path_final := filepath.Join(upload_dir, filename)
 		folder, err := os.Create(path_final)
 		if err != nil {
 			//logger the data response if create image file is failed
-			logger.Log.Error("Failed because the image file is invalid!", 
+			logger.Log.Error("Failed because the image file is invalid!",
 				zap.String("request_id", requestID),
 				zap.String("client_ip", r.RemoteAddr),
-		)
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to create the folder!", err.Error())
-			return 
+			return
 		}
 		if path_final == "" {
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to create the folder of uploads!", false)
-			return 
+			return
 		}
 		defer folder.Close()
 
@@ -456,26 +456,26 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 		dst, err := io.Copy(folder, file_image)
 		if err != nil {
 			//logger the data response if the copy io is failed
-			logger.Log.Error("Failed because the lenght of the file is zero!", 
+			logger.Log.Error("Failed because the lenght of the file is zero!",
 				zap.String("request_id", requestID),
 				zap.String("client_ip", r.RemoteAddr),
-		)
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to copy the data from fileimage!", err.Error())
-			return 
-		} 
+			return
+		}
 		if dst == 0 {
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to copy the data because the length of the data is 0", false)
-			return 
+			return
 		}
 		users_profile_image, err := h.db.GetUserById(user_id)
 		if err != nil {
 			//logger the data response if users is failed
-			logger.Log.Error("Failed because id is invalid!", 
+			logger.Log.Error("Failed because id is invalid!",
 				zap.String("request_id", requestID),
 				zap.String("client_ip", r.RemoteAddr),
-		)
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to get the users from db!", err.Error())
-			return 
+			return
 		}
 
 		//if the users have a profile image in their data profile, and then they want to update the profile image again
@@ -487,14 +487,14 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 			if _, err := os.Stat(path_old); !os.IsNotExist(err) {
 				if err := os.Remove(path_old); err != nil {
 					//logger the data response if the file is not exist
-				logger.Log.Error("Failed ro remove data!", 
-					zap.String("request_id", requestID),
-					zap.String("client_ip", r.RemoteAddr),
-				)
+					logger.Log.Error("Failed ro remove data!",
+						zap.String("request_id", requestID),
+						zap.String("client_ip", r.RemoteAddr),
+					)
 					utils.ResponseError(w, http.StatusBadRequest, "Failed to remove the new data of uploads!", err.Error())
-					return 
+					return
 				}
-			} 
+			}
 		}
 		payload.Profile_Image = &path_final
 	}
@@ -511,42 +511,42 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 	if password != "" {
 		payload.Password = &password
 	}
-	
+
 	//settings the context and setup the query
-	ctx, cancle := context.WithTimeout(r.Context(), time.Second * 10)
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
 	if err := h.db.UpdateDataUser(user_id, ctx, payload); err != nil {
 		//logger the data response if the update data is failed
-			logger.Log.Error("Failed because the id or data is invalid!!", 
-				zap.String("request_id", requestID),
-				zap.String("client_ip", r.RemoteAddr),
+		logger.Log.Error("Failed because the id or data is invalid!!",
+			zap.String("request_id", requestID),
+			zap.String("client_ip", r.RemoteAddr),
 		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to update the data user!", err.Error())
-		return 
+		return
 	}
 
 	//get the user data in db
 	users, err := h.db.GetUserById(user_id)
 	if err != nil {
 		//logger the data response if the id is invalid
-			logger.Log.Error("Failed because the id is invalid!", 
-				zap.String("request_id", requestID),
-				zap.String("client_ip", r.RemoteAddr),
+		logger.Log.Error("Failed because the id is invalid!",
+			zap.String("request_id", requestID),
+			zap.String("client_ip", r.RemoteAddr),
 		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get data user from db!", err.Error())
-		return 
+		return
 	}
 
 	//make the user response
 	user_update_response := types.UserResponse{
-		Id: users.Id,
-		Username: users.Username,
-		Email: users.Email,
-		Password: users.Password,
+		Id:            users.Id,
+		Username:      users.Username,
+		Email:         users.Email,
+		Password:      users.Password,
 		Profile_Image: users.Profile_Image,
-		Role: users.Role,
-		Created_at: time.Now().UTC().Format("2006-01-02"),
-		Updated_at: time.Now().UTC().Format("2006-01-02"),
+		Role:          users.Role,
+		Created_at:    time.Now().UTC().Format("2006-01-02"),
+		Updated_at:    time.Now().UTC().Format("2006-01-02"),
 	}
 
 	//return final results
@@ -554,19 +554,19 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func to get the profile image picture in postman / url
+// func to get the profile image picture in postman / url
 func (h *HandleRequest) Image_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//get the request id from this func
 	requestID := middleware.GetRequestID(r)
 	if requestID == "" {
 		//logger the data response if the request id value is zero!
-		logger.Log.Info("Failed to get the request id!", 
+		logger.Log.Info("Failed to get the request id!",
 			zap.String("client_ip", r.RemoteAddr),
 			zap.String("path", r.URL.Path),
-	)
+		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the request id!", false)
-		return 
+		return
 	}
 
 	//to get the params of the file
@@ -574,24 +574,24 @@ func (h *HandleRequest) Image_Bp(w http.ResponseWriter, r *http.Request) {
 	filename := filename_params["filename"]
 	if filename == "" {
 		//logger the data response if the params is null
-			logger.Log.Error("Failed because the params is invalid!", 
-				zap.String("request_id", requestID),
-				zap.String("client_ip", r.RemoteAddr),
+		logger.Log.Error("Failed because the params is invalid!",
+			zap.String("request_id", requestID),
+			zap.String("client_ip", r.RemoteAddr),
 		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to create the params of the image!", false)
-		return 
+		return
 	}
 
 	//get the path name of the profile image
 	path_name := filepath.Join("uploads_user", filename)
 	if _, err := os.Stat(path_name); os.IsNotExist(err) {
 		//logger the data response the checking data file is invalid
-			logger.Log.Error("Failed because the file is not exist", 
-				zap.String("request_id", requestID),
-				zap.String("client_ip", r.RemoteAddr),
+		logger.Log.Error("Failed because the file is not exist",
+			zap.String("request_id", requestID),
+			zap.String("client_ip", r.RemoteAddr),
 		)
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to detect the file or path name", err.Error())
-		return 
+		return
 	}
 
 	//serve http for file
