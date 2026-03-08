@@ -1,0 +1,87 @@
+package tasks
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
+)
+
+type StoreTask struct {
+	db *sqlx.DB
+}
+
+// make the new handler store for tasks
+func NewTaskStore(s *sqlx.DB) *StoreTask {
+	return &StoreTask{db: s}
+}
+
+// func to make the new tasks for a student
+func (s *StoreTask) CreateNewTasks(ctx context.Context, id_student uuid.UUID, task *types.Task) error {
+
+	//setup the options for a transaction
+	option_tx := &sql.TxOptions{
+		Isolation: sql.LevelLinearizable,
+		ReadOnly:  false,
+	}
+
+	//begin the transaction for this method
+	tx, err := s.db.BeginTxx(ctx, option_tx)
+	if err != nil {
+		return errors.New("Failed to setup the transaction for this method!")
+	}
+	defer tx.Rollback()
+
+	//query for find a student_id
+	var students types.Student
+	query_student_id := `
+		SELECT name, kelas, jurusan, absen, wali_kelas FROM students
+		WHERE id = $1;
+	`
+
+	//execute the method query to find the student id
+	if err := s.db.Get(students.Id, query_student_id, id_student); err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("Failed to find the student id!")
+		}
+		return errors.New("Failed to get the student_id from student table!")
+	}
+
+	//query for create a new task
+	query_task := `
+		INSERT INTO tasks (name_task, file_task, date_task, student_id, created_at, updated-at) 
+		VALUES ($1, $2, $3, $4, $5, $6);
+	`
+
+	//execute the method query to create a new data for task table
+	if err := tx.QueryRowContext(
+		ctx,
+		query_task,
+		task.Name_Task,
+		task.File_Task,
+		task.Date_Task,
+		task.Student_Id,
+		task.Created_at,
+		task.Updated_at,
+	).Scan(
+		&task.Name_Task,
+		&task.File_Task,
+		&task.Date_Task,
+		&task.Student_Id,
+		&task.Created_at,
+		&task.Updated_at,
+	); err != nil {
+		return errors.New("Failed to scan the payload to real data in db!")
+	}
+
+	//commit the transaction if transaction has been successfully!
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the data create!")
+	}
+
+	return nil
+
+}

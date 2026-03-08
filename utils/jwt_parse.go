@@ -11,30 +11,29 @@ import (
 )
 
 type SignedDetails struct {
-	Id 			string
-	Username 	string 
-	Email 		string 
-	Role      	string
+	Id       string
+	Username string
+	Email    string
+	Role     string
 	jwt.RegisteredClaims
 }
 
-func GenerateJwt (id uuid.UUID, username string, email string, role string) (string, string, error) {
-	
+func GenerateJwt(id uuid.UUID, username string, email string, role string) (string, string, error) {
+
 	if err := godotenv.Load(); err != nil {
 		return "", "", errors.New("Failed to load env as you want!")
 	}
 	token_not_refresh := os.Getenv("JWT_SECRET_KEY")
 
 	signed_details_not_refresh := &SignedDetails{
-		Id: id.String(),
+		Id:       id.String(),
 		Username: username,
-		Email: email,
-		Role: role,
+		Email:    email,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
-			Issuer: token_not_refresh,
-			IssuedAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
-			
+			Issuer:    token_not_refresh,
+			IssuedAt:  jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},
 	}
 
@@ -47,19 +46,19 @@ func GenerateJwt (id uuid.UUID, username string, email string, role string) (str
 	token_refresh := os.Getenv("JWT_SECRET_KEY_REFRESH_TOKEN")
 
 	signed_details_refresh := &SignedDetails{
-		Id: id.String(),
+		Id:       id.String(),
 		Username: username,
-		Email: email,
-		Role: role, 
+		Email:    email,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
-			Issuer: token_refresh,
-			IssuedAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
+			Issuer:    token_refresh,
+			IssuedAt:  jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
 		},
 	}
 
 	token_refresh_final := jwt.NewWithClaims(jwt.SigningMethodHS256, signed_details_refresh)
-	token_refresh_final_1, err  := token_refresh_final.SignedString([]byte(token_refresh))
+	token_refresh_final_1, err := token_refresh_final.SignedString([]byte(token_refresh))
 	if err != nil {
 		return "", "", errors.New("Failed to signed the data of json web token!" + err.Error())
 	}
@@ -68,7 +67,7 @@ func GenerateJwt (id uuid.UUID, username string, email string, role string) (str
 
 }
 
-func ValidateToken (tokenAuth string) (*SignedDetails, error) {
+func ValidateToken(tokenAuth string) (*SignedDetails, error) {
 
 	claims := &SignedDetails{}
 

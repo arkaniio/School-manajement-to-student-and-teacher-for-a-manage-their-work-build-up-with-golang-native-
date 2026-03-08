@@ -1,5 +1,5 @@
-CREATE TABLE public.users (
-    id              UUID PRIMARY KEY DEFAULT
+CREATE TABLE users (
+    id              UUID NOT NULL PRIMARY KEY DEFAULT
                     gen_random_uuid(),
     username        TEXT NOT NULL,
     email           VARCHAR(255) NOT NULL,

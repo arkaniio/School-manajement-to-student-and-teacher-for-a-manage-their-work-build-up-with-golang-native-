@@ -82,7 +82,7 @@ func (s *ApiServer) Run() error {
 	// Router for the update user (with auth middleware)
 	subRouter.Handle(
 		"/users/{id}",
-			http.HandlerFunc(userService.Update_Bp),
+		http.HandlerFunc(userService.Update_Bp),
 	).Methods("PATCH")
 
 	// Router to see the file path for frontend to catch it
@@ -100,9 +100,9 @@ func (s *ApiServer) Run() error {
 	//router for register as a student
 	subRouter.Handle(
 		"/students/register",
-			middleware.TokenIdMiddleware(http.HandlerFunc(
-				studentService.RegisterAsStudent_Bp,
-			)),
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			studentService.RegisterAsStudent_Bp,
+		)),
 	).Methods("POST")
 
 	//router for a get all students
@@ -125,14 +125,22 @@ func (s *ApiServer) Run() error {
 		),
 	).Methods("PUT")
 
+	//router for deleting the data students, only admin
+	subRouter.Handle(
+		"/student/{id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			studentService.Delete_Bp,
+		)),
+	).Methods("DELETE")
+
 	// Create HTTP server
 	s.server = &http.Server{
-		Addr:         s.Addr,
-		Handler:      router,
+		Addr:    s.Addr,
+		Handler: router,
 		// Timeouts to prevent slowloris attacks
-		ReadTimeout:  15 * time.Second,  // 15 minutes
-		WriteTimeout: 15 * time.Second,  // 15 minutes
-		IdleTimeout:  60 * time.Second,       // 60 seconds
+		ReadTimeout:  15 * time.Second, // 15 minutes
+		WriteTimeout: 15 * time.Second, // 15 minutes
+		IdleTimeout:  60 * time.Second, // 60 seconds
 	}
 
 	// Start listening
@@ -150,4 +158,3 @@ func (s *ApiServer) Shutdown(ctx context.Context) error {
 	}
 	return nil
 }
-
