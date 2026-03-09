@@ -645,3 +645,4 @@
 2026-03-09T21:28:32.591+0800	[34mINFO[0m	runtime/proc.go:290	Connecting to PostgreSQL database...
 2026-03-09T21:28:32.720+0800	[34mINFO[0m	runtime/proc.go:290	Database connected successfully	{"database": "School-manajement"}
 2026-03-09T21:28:32.720+0800	[34mINFO[0m	runtime/asm_amd64.s:1771	Starting server	{"port": ":8080"}
+2026-03-09T21:28:37.106+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:60630", "status": 201, "duration": 0.0047858}
