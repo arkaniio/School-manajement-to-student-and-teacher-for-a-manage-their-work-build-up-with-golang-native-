@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
-
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
 	serviceStudent "github.com/ArkaniLoveCoding/Shcool-manajement/service/students"
+	"github.com/ArkaniLoveCoding/Shcool-manajement/service/tasks"
 	serviceUser "github.com/ArkaniLoveCoding/Shcool-manajement/service/users"
+	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 )
 
 type ApiServer struct {
@@ -132,6 +132,18 @@ func (s *ApiServer) Run() error {
 			studentService.Delete_Bp,
 		)),
 	).Methods("DELETE")
+
+	//service for a task
+	taskStore := tasks.NewTaskStore(s.db)
+	taskService := tasks.NewHandlerTask(taskStore)
+
+	//router for create a new task
+	subRouter.Handle(
+		"/task",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			taskService.Create_TaskBp,
+		)),
+	).Methods("POST")
 
 	// Create HTTP server
 	s.server = &http.Server{

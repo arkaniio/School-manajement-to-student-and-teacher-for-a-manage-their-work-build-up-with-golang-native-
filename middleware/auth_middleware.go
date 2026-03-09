@@ -249,4 +249,3 @@ func GetRoleMiddleware(w http.ResponseWriter, r *http.Request) (string, error) {
 	return role_user, nil
 
 }
-

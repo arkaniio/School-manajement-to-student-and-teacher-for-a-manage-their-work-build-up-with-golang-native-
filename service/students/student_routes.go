@@ -366,7 +366,7 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 
 		//settings the file name and file path
 		filename := uuid.New().String() + filepath.Ext(header.Filename)
-		uploadDir := "uploadsStudent"
+		uploadDir := "/uploadsStudent"
 		if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
 			//logger the data response if something happen with this method
 			logger.Log.Error("Failed to make a new folder to save the file!",
