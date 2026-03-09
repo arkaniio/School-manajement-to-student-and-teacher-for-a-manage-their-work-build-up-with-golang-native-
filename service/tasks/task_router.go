@@ -205,6 +205,11 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	var validate *validator.Validate
 	validate = validator.New()
 	if err := validate.Struct(&payload); err != nil {
+		//logger the error response data for this method
+		logger.Log.Error("Failed to check the validator for this method!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
 		var errors []string
 		for _, Err := range err.(validator.ValidationErrors) {
 			errors = append(errors, fmt.Sprintf("Error detected: %s and %s", Err.Field(), Err.ActualTag()))

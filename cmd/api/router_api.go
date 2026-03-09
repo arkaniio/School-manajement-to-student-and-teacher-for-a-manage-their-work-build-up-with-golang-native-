@@ -99,39 +99,11 @@ func (s *ApiServer) Run() error {
 
 	//router for register as a student
 	subRouter.Handle(
-		"/students/register",
+		"/student",
 		middleware.TokenIdMiddleware(http.HandlerFunc(
 			studentService.RegisterAsStudent_Bp,
 		)),
 	).Methods("POST")
-
-	//router for a get all students
-	subRouter.Handle(
-		"/students/list",
-		middleware.TokenIdMiddleware(
-			http.HandlerFunc(
-				studentService.GetAll_Bp,
-			),
-		),
-	).Methods("GET")
-
-	//router for handle a update students
-	subRouter.Handle(
-		"/student/update/{id}",
-		middleware.TokenIdMiddleware(
-			http.HandlerFunc(
-				studentService.Update_Bp,
-			),
-		),
-	).Methods("PUT")
-
-	//router for deleting the data students, only admin
-	subRouter.Handle(
-		"/student/{id}",
-		middleware.TokenIdMiddleware(http.HandlerFunc(
-			studentService.Delete_Bp,
-		)),
-	).Methods("DELETE")
 
 	//service for a task
 	taskStore := tasks.NewTaskStore(s.db)
