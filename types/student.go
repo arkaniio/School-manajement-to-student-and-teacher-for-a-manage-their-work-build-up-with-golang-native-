@@ -9,6 +9,7 @@ import (
 
 type StudentStore interface {
 	CreateNewStudent(ctx context.Context, students *Student) error
+	DeleteStudents(id uuid.UUID, ctx context.Context) error
 }
 
 type Student struct {

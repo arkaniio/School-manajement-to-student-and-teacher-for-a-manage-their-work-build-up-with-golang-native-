@@ -12,6 +12,7 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
 
@@ -128,5 +129,83 @@ func (h *HandleRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *http.Requ
 
 	//return final result for this method
 	utils.ResponseSuccess(w, http.StatusCreated, "Create a new student has been successfully!", students_response)
+
+}
+
+// func to delete the students (only admin and teacher can do and access this method)
+func (h *HandleRequest) DeleteStudent_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//make the request id from logger middleware
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role in middleware token to check the role of the users students or admin and or teacher
+	role_students, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the data response error for this method
+		logger.Log.Error("Failed to get the role middleware!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role from middleware token role", err.Error())
+		return
+	}
+	if role_students != "admin" && role_students != "guru" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method, invalid role!", false)
+		return
+	}
+
+	//get the params id from params url
+	vars_params := mux.Vars(r)
+	if vars_params == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the params id from url!", false)
+		return
+	}
+	user_id := vars_params["id"]
+	if user_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the id from url params", false)
+		return
+	}
+
+	//convert into an uuid type for user_id
+	uuid_user, err := uuid.Parse(user_id)
+	if err != nil {
+		//logger the response data error from this method
+		logger.Log.Error("Failed to convert into an uuid type for user_id!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to convert type string into an uuid!", err.Error())
+		return
+	}
+	if uuid_user == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Nil!", false)
+		return
+	}
+
+	//execute the query from store method!
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.DeleteStudents(uuid_user, ctx); err != nil {
+		//logger the data response error for this method
+		logger.Log.Error("Failed to delete the students data!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to delete the students data!", err.Error())
+		return
+	}
+
+	//return final response
+	utils.ResponseError(w, http.StatusOK, "Delete data has been successfully!", true)
 
 }

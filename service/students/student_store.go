@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -74,6 +75,50 @@ func (s *StudentStore) CreateNewStudent(ctx context.Context, students *types.Stu
 		return errors.New("Failed to commit the transaction" + err.Error())
 	}
 
+	return nil
+
+}
+
+// func that containt the delete query at here
+func (s *StudentStore) DeleteStudents(id uuid.UUID, ctx context.Context) error {
+
+	//setup the transactions option here
+	options := &sql.TxOptions{
+		Isolation: sql.LevelSerializable,
+		ReadOnly:  false,
+	}
+
+	//setup the final transaction
+	tx, err := s.db.BeginTxx(ctx, options)
+	if err != nil {
+		return errors.New("Failed to setup the final transaction for this method")
+	}
+	defer tx.Rollback()
+
+	//base query for this methid
+	query := `
+		DELETE FROM students WHERE id = $1;
+	`
+
+	//execute the query for this method
+	result, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return errors.New("Failed to get the result of every rows in students table!")
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("Failed to detected the rows in table students")
+	}
+	if rows == 0 {
+		return errors.New("Invali rows!")
+	}
+
+	//commit the transaction
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transactions!")
+	}
+
+	//return final result
 	return nil
 
 }
