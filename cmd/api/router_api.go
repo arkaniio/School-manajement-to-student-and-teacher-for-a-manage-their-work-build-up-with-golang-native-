@@ -113,6 +113,14 @@ func (s *ApiServer) Run() error {
 		)),
 	).Methods("DELETE")
 
+	//router for update the students data
+	subRouter.Handle(
+		"/student/{id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			studentService.UpdateStudents_Bp,
+		)),
+	).Methods("PATCH")
+
 	//service for a task
 	taskStore := tasks.NewTaskStore(s.db)
 	taskService := tasks.NewHandlerTask(taskStore)
