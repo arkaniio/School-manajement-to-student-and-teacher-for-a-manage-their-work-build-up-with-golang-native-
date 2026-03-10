@@ -3,7 +3,11 @@ package students
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
@@ -17,17 +21,17 @@ import (
 )
 
 // type handlerequest that declare the student store for a database logic
-type HandleRequest struct {
+type HandleStudentsRequest struct {
 	db types.StudentStore
 }
 
 // func that declare the handler for student
-func NewHandlerStudent(db types.StudentStore) *HandleRequest {
-	return &HandleRequest{db: db}
+func NewHandlerStudent(db types.StudentStore) *HandleStudentsRequest {
+	return &HandleStudentsRequest{db: db}
 }
 
 // func to create a new student
-func (h *HandleRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *http.Request) {
+func (h *HandleStudentsRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//get the request id from middleware
 	request_id := middleware.GetRequestID(r)
@@ -133,7 +137,7 @@ func (h *HandleRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *http.Requ
 }
 
 // func to delete the students (only admin and teacher can do and access this method)
-func (h *HandleRequest) DeleteStudent_Bp(w http.ResponseWriter, r *http.Request) {
+func (h *HandleStudentsRequest) DeleteStudent_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//make the request id from logger middleware
 	//get the request id from middleware
@@ -207,5 +211,259 @@ func (h *HandleRequest) DeleteStudent_Bp(w http.ResponseWriter, r *http.Request)
 
 	//return final response
 	utils.ResponseError(w, http.StatusOK, "Delete data has been successfully!", true)
+
+}
+
+// func to handle the routes as a part of routes in this method
+func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role students user from middleware token id
+	role_students, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the role students from middleware!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role students from middleware!", err.Error())
+		return
+	}
+	if role_students != "siswa" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method!, Invalid role students!", false)
+		return
+	}
+
+	//get the params for a id in url endpoint
+	vars_id := mux.Vars(r)
+	if vars_id == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the params id at url endpoint because nill!", false)
+		return
+	}
+	user_id := vars_id["id"]
+	if user_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the string of id parameter in url endpoint!", false)
+		return
+	}
+
+	//parsing into an uuid type
+	uuid_user, err := uuid.Parse(user_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to convert from string type into an uuid type!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to convet from string type into an uuid type!", err.Error())
+		return
+	}
+	if uuid_user == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Invalid result of uuid convert!", false)
+		return
+	}
+
+	//parsing into a max byte of file type for a request from every students
+	if err := http.MaxBytesReader(w, r.Body, 10<<20); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to settings the max byte reader for an http request!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the http request for max byte in every requests!", err.Close().Error())
+		return
+	}
+
+	//parse every requests to a multipart form data
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to parsing every requests from request students!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the multipart form data", err.Error())
+		return
+	}
+
+	//declare the variable form file
+	var payloads types.UpdateAsStudent
+	full_name := r.FormValue("full_task")
+	kelas := r.FormValue("kelas")
+	jurusan := r.FormValue("jurusan")
+	absen := r.FormValue("absen")
+	wali_kelas := r.FormValue("wali_kelas")
+
+	//convert the value of absen into an integer
+	absen_fix, err := strconv.Atoi(absen)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to convert from string into an integer for a absen!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to convert type strings into an integer for a absen!", err.Error())
+		return
+	}
+
+	//settings the form file to a student profile field in db
+	student_profile_name, header, err := r.FormFile("student_profile")
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to settings the form file to student profile fields!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the form file to student profile!", err.Error())
+		return
+	}
+	//because this is the update method, we have to detect if the error is nill, it will be read the file and
+	//put the logic on that condition to make sure if students is right if they not update their students profile
+	if err == nil {
+
+		//reade the file and detect the content type for this file
+		buff := make([]byte, 512)
+		read, err := student_profile_name.Read(buff)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to read the file buff!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to read the file buff !", err.Error())
+			return
+		}
+		if read == 0 {
+			utils.ResponseError(w, http.StatusBadRequest, "Invalid length of the read file!", false)
+			return
+		}
+		content_type_file := http.DetectContentType(buff)
+		if content_type_file != "image/jpg" && content_type_file != "image/jpeg" && content_type_file != "image/png" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to access this file! Invalid content type", false)
+			return
+		}
+
+		//create the filename and os name
+		file_name_student := uuid.New().String() + header.Filename
+		if file_name_student == "" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to get the file name student profile!", false)
+			return
+		}
+		path_os := "/uploads_student"
+		if err := os.MkdirAll(path_os, os.ModePerm); err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to settings the os for this file!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the os for this file!", err.Error())
+			return
+		}
+		path_file := filepath.Join(path_os, file_name_student)
+		if path_file == "" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to get settings the file name!", false)
+			return
+		}
+
+		//create os for a folder to this students file
+		dst, err := os.Create(path_file)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to create the os file!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to create the os file based on file name on this method!", err.Error())
+			return
+		}
+		defer dst.Close()
+
+		//copy the file into an io reader to communicate with a request from students
+		copy, err := io.Copy(dst, student_profile_name)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to copy the file!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to copy the file name!", err.Error())
+			return
+		}
+		if copy == 0 {
+			utils.ResponseError(w, http.StatusBadRequest, "Invalid io reader!", false)
+			return
+		}
+
+		//check if the students profile is exist in folder, if the students is updating again their students profile
+		//its gonna be replace from old path to a new path in folder students profile
+		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+		defer cancle()
+		students, err := h.db.GetStudentById(uuid_user, ctx)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to get the students id from db!",
+				zap.String("request_id", request_id),
+				zap.String("cllient_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to get students data from db by id!", err.Error())
+			return
+		}
+		if students.StudentProfile != "" {
+			path_old := students.StudentProfile
+			if _, err := os.Stat(path_old); os.IsNotExist(err) {
+				if err := os.Remove(path_old); err != nil {
+					//logger the response error for this method
+					logger.Log.Error("Failed to remove the data old from db!",
+						zap.String("request_id", request_id),
+						zap.String("client_ip", r.RemoteAddr),
+					)
+					utils.ResponseError(w, http.StatusBadRequest, "Failed to remove the old path!", err.Error())
+					return
+				}
+			}
+		}
+
+		//if the payload in students profile is not nill
+		payloads.StudentProfile = &path_file
+
+	}
+
+	//checking and validate again
+	if payloads.Full_name != nil {
+		payloads.Full_name = &full_name
+	} else if payloads.Kelas != nil {
+		payloads.Kelas = &kelas
+	} else if payloads.Jurusan != nil {
+		payloads.Jurusan = &jurusan
+	} else if payloads.Absen != nil {
+		payloads.Absen = &absen_fix
+	} else if payloads.Wali_Kelas != nil {
+		payloads.Wali_Kelas = &wali_kelas
+	}
+
+	//execute the query
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.UpdateStudentsData(uuid_user, payloads, ctx); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to update and execute the query!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to update and execute the query!", err.Error())
+		return
+	}
+
+	//return final result and message
+	utils.ResponseSuccess(w, http.StatusOK, "Update data students has been successfully!", true)
 
 }

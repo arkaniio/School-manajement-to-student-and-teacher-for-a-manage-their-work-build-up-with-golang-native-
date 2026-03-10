@@ -234,6 +234,11 @@ func (s *StudentStore) UpdateStudentsData(id uuid.UUID, payload types.UpdateAsSt
 		return errors.New("Invalid rows!")
 	}
 
+	//commit the transactions
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transaction")
+	}
+
 	//return final result based on returning in this method or func
 	return nil
 

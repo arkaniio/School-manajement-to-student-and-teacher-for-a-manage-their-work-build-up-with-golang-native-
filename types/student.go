@@ -10,6 +10,8 @@ import (
 type StudentStore interface {
 	CreateNewStudent(ctx context.Context, students *Student) error
 	DeleteStudents(id uuid.UUID, ctx context.Context) error
+	UpdateStudentsData(id uuid.UUID, payload UpdateAsStudent, ctx context.Context) error
+	GetStudentById(id uuid.UUID, ctx context.Context) (*Student, error)
 }
 
 type Student struct {
@@ -17,7 +19,7 @@ type Student struct {
 	Full_Name      string    `db:"full_name"`
 	Kelas          string    `db:"kelas"`
 	Jurusan        string    `db:"jurusan"`
-	Absen          int32     `db:"absen"`
+	Absen          int       `db:"absen"`
 	StudentProfile string    `db:"student_profile"`
 	Wali_Kelas     string    `db:"wali_kelas"`
 	Created_at     time.Time `db:"created_at"`
@@ -29,7 +31,7 @@ type RegisterAsStudent struct {
 	Full_name      string    `json:"full_name"`
 	Kelas          string    `json:"kelas"`
 	Jurusan        string    `json:"jurusan"`
-	Absen          int32     `json:"absen"`
+	Absen          int       `json:"absen"`
 	StudentProfile string    `json:"student_profile"`
 	Wali_Kelas     string    `json:"wali_kelas"`
 	Created_at     time.Time `json:"created_at"`
@@ -41,7 +43,7 @@ type UpdateAsStudent struct {
 	Full_name      *string   `json:"full_name"`
 	Kelas          *string   `json:"kelas"`
 	Jurusan        *string   `json:"jurusan"`
-	Absen          *int32    `json:"absen"`
+	Absen          *int      `json:"absen"`
 	StudentProfile *string   `json:"student_profile"`
 	Wali_Kelas     *string   `json:"wali_kelas"`
 	Created_at     time.Time `json:"created_at"`
@@ -53,7 +55,7 @@ type StudentResponse struct {
 	Full_name      string    `json:"full_name"`
 	Kelas          string    `json:"kelas"`
 	Jurusan        string    `json:"jurusan"`
-	Absen          int32     `json:"absen"`
+	Absen          int       `json:"absen"`
 	StudentProfile string    `json:"student_profile"`
 	Wali_Kelas     string    `json:"wali_kelas"`
 	Created_at     string    `json:"created_at"`

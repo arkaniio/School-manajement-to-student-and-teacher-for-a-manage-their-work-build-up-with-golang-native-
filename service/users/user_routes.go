@@ -425,7 +425,7 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 
 		//make the name of the file profile image and then join it into a some folder in this project
 		filename := uuid.New().String() + filepath.Ext(header.Filename)
-		upload_dir := "uploads_user"
+		upload_dir := "/uploads_user"
 		if err := os.MkdirAll(upload_dir, os.ModePerm); err != nil {
 			//logger the data response if the make folder is failed
 			logger.Log.Error("Failed!",
