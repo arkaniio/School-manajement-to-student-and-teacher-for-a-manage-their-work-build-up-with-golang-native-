@@ -59,15 +59,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	}
 
 	//settings the maxbyte of the file form to input task
-	if err := http.MaxBytesReader(w, r.Body, 10<<20); err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to settings the max byte reader for the request file",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the max byte for a request", err.Close().Error())
-		return
-	}
+	r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
 
 	//settings the multipart form data for this method
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -82,21 +74,16 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 
 	//make the formfile for this method and validate if the input user is nill
 	name_task := r.FormValue("name_task")
-	date_task := r.FormValue("date_task")
-	date_task_payload, err := time.Parse(date_task, "2006-01-02")
-	if err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to parsing the date task file!",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the date task!", err.Error())
-		return
-	}
-	if name_task == "" && date_task == "" {
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the form value!", false)
-		return
-	}
+	// date_task_payload, err := time.Parse(date_task, "2006-01-02")
+	// if err != nil {
+	// 	//logger the response error for this method
+	// 	logger.Log.Error("Failed to parsing the date task file!",
+	// 		zap.String("request_id", request_id),
+	// 		zap.String("client_ip", r.RemoteAddr),
+	// 	)
+	// 	utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the date task!", err.Error())
+	// 	return
+	// }
 
 	//make the form file to input the file task file
 	file_task, header, err := r.FormFile("file_task")
@@ -138,7 +125,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the name for the task file", false)
 		return
 	}
-	path_folder := `/uploads_task`
+	path_folder := `uploadsTask`
 	if err := os.MkdirAll(path_folder, os.ModePerm); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to settings the os for this path!",
@@ -186,17 +173,19 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	//declare the time for updated_at and created_at
 	time_updated := time.Now().UTC()
 	time_created := time.Now().UTC()
+	time_date_task := time.Now().UTC()
 
 	//declare the time format for response task
 	time_updated_format := time.Now().UTC().Format("2006-01-02")
 	time_created_format := time.Now().UTC().Format("2006-01-02")
+	time_date_task_format := time.Now().UTC().Format("2006-01-02")
 
 	//parsing into a payload
 	payload := types.Payload{
 		Id:         uuid.New(),
 		Name_Task:  name_task,
 		File_Task:  file_path,
-		Date_Task:  date_task_payload,
+		Date_Task:  time_date_task,
 		Created_at: time_created,
 		Updated_at: time_updated,
 	}
@@ -230,8 +219,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	//execute the query from task store
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	var student_id types.Student
-	if err := h.db.CreateNewTasks(ctx, student_id.Id, tasks); err != nil {
+	if err := h.db.CreateNewTasks(ctx, tasks); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to create a new task!",
 			zap.String("request_id", request_id),
@@ -246,7 +234,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		Id:         tasks.Id,
 		Name_Task:  tasks.Name_Task,
 		File_Task:  tasks.File_Task,
-		Date_Task:  tasks.Date_Task.Format("2006-01-02"),
+		Date_Task:  time_date_task_format,
 		Student_Id: tasks.Student_Id,
 		Created_at: time_created_format,
 		Updated_at: time_updated_format,

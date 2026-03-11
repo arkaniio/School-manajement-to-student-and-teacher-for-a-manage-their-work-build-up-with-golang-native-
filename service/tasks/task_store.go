@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -20,11 +19,11 @@ func NewTaskStore(s *sqlx.DB) *StoreTask {
 }
 
 // func to make the new tasks for a student
-func (s *StoreTask) CreateNewTasks(ctx context.Context, id_student uuid.UUID, task *types.Task) error {
+func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error {
 
 	//setup the options for a transaction
 	option_tx := &sql.TxOptions{
-		Isolation: sql.LevelLinearizable,
+		Isolation: sql.LevelSerializable,
 		ReadOnly:  false,
 	}
 
@@ -36,24 +35,25 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, id_student uuid.UUID, ta
 	defer tx.Rollback()
 
 	//query for find a student_id
-	var students types.Student
-	query_student_id := `
-		SELECT name, kelas, jurusan, absen, wali_kelas FROM students
-		WHERE id = $1;
-	`
+	// var students types.Student
+	// query_student_id := `
+	// 	SELECT name, kelas, jurusan, absen, wali_kelas FROM students
+	// 	WHERE id = $1;
+	// `
 
 	//execute the method query to find the student id
-	if err := s.db.Get(students.Id, query_student_id, id_student); err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("Failed to find the student id!")
-		}
-		return errors.New("Failed to get the student_id from student table!")
-	}
+	// if err := s.db.Get(students.Id, query_student_id, id_student); err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		return errors.New("Failed to find the student id!")
+	// 	}
+	// 	return errors.New("Failed to get the student_id from student table!")
+	// }
 
 	//query for create a new task
 	query_task := `
-		INSERT INTO tasks (name_task, file_task, date_task, student_id, created_at, updated-at) 
-		VALUES ($1, $2, $3, $4, $5, $6);
+		INSERT INTO tasks (name_task, file_task, date_task, student_id, created_at, updated_at) 
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING*;
 	`
 
 	//execute the method query to create a new data for task table
@@ -74,7 +74,7 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, id_student uuid.UUID, ta
 		&task.Created_at,
 		&task.Updated_at,
 	); err != nil {
-		return errors.New("Failed to scan the payload to real data in db!")
+		return errors.New("Failed to scan the payload to real data in db!" + err.Error())
 	}
 
 	//commit the transaction if transaction has been successfully!

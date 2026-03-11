@@ -8,7 +8,7 @@ import (
 )
 
 type TaskStore interface {
-	CreateNewTasks(ctx context.Context, id_student uuid.UUID, task *Task) error
+	CreateNewTasks(ctx context.Context, task *Task) error
 }
 
 type Task struct {
