@@ -9,8 +9,8 @@ import (
 )
 
 type ConfigParams struct {
-	PublicHost      string
-	Port 			string
+	PublicHost string
+	Port       string
 	// PostgreSQL specific
 	PostgresHost            string
 	PostgresPort            string
@@ -23,8 +23,8 @@ type ConfigParams struct {
 	PostgresConnMaxIdleTime time.Duration
 	PostgresSSLMode         string
 	// Retry settings
-	DbMaxRetries  int
-	DbRetryDelay  time.Duration
+	DbMaxRetries int
+	DbRetryDelay time.Duration
 }
 
 func ConfigInitialize() ConfigParams {
@@ -33,7 +33,7 @@ func ConfigInitialize() ConfigParams {
 
 	return ConfigParams{
 		PublicHost: KeyEnvLookUp("PUBLIC_HOST", "http://localhost"),
-		Port	  : KeyEnvLookUp("PORT", ":8080"),
+		Port:       KeyEnvLookUp("PORT", ":8080"),
 		// PostgreSQL specific config
 		PostgresHost:            KeyEnvLookUp("DB_HOST", "localhost"),
 		PostgresPort:            KeyEnvLookUp("DB_PORT", "5432"),

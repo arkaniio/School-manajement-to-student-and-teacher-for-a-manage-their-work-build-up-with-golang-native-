@@ -466,3 +466,50 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	utils.ResponseSuccess(w, http.StatusOK, "Update data students has been successfully!", true)
 
 }
+
+// func to get the filename and we can opent it into a postman or url
+func (h *HandleStudentsRequest) ReadFilename_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from request user
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//make the params for the path in url postman
+	vars_fileName := mux.Vars(r)
+	if vars_fileName == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the params into an path in postman", false)
+		return
+	}
+	file_nameParams := vars_fileName["file_name"]
+	if file_nameParams == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "No one params detected in this route!", false)
+		return
+	}
+
+	//combine path
+	path_folder := "uploadsStudent"
+	file_name := filepath.Join(path_folder, file_nameParams)
+
+	//check if the file is exist or not
+	if _, err := os.Stat(file_name); os.IsNotExist(err) {
+		//logger the response error for this method
+		logger.Log.Error("Failed to check the data is exist or not!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to check the file name is exist or not!", err.Error())
+		return
+	}
+
+	//serve the file_name in http
+	http.ServeFile(w, r, file_name)
+
+}

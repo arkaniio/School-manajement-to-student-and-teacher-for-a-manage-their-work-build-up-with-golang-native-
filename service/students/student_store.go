@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
 	"github.com/google/uuid"
@@ -214,17 +215,16 @@ func (s *StudentStore) UpdateStudentsData(id uuid.UUID, payload types.UpdateAsSt
 	//update the updated at
 	settings = append(settings, fmt.Sprintf("updated_at=$%d", argsID))
 	argsID++
-	args = append(args, settings)
+	args = append(args, time.Now().UTC())
 
 	//combine all of interface to one interface
 	base_query := fmt.Sprintf("UPDATE students SET %s WHERE id = $%d", strings.Join(settings, ","), argsID)
-	settings = append(settings, base_query)
-	args = append(args, settings)
+	args = append(args, id)
 
 	//execute the query context
 	result, err := tx.ExecContext(ctx, base_query, args...)
 	if err != nil {
-		return errors.New("Failed to update the data students")
+		return errors.New("Failed to update the data students" + err.Error())
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
