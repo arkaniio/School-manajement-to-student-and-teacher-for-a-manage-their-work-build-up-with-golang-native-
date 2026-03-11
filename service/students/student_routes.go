@@ -274,15 +274,7 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	}
 
 	//parsing into a max byte of file type for a request from every students
-	if err := http.MaxBytesReader(w, r.Body, 10<<20); err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to settings the max byte reader for an http request!",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the http request for max byte in every requests!", err.Close().Error())
-		return
-	}
+	r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
 
 	//parse every requests to a multipart form data
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -297,34 +289,25 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 
 	//declare the variable form file
 	var payloads types.UpdateAsStudent
-	full_name := r.FormValue("full_task")
+	full_name := r.FormValue("full_name")
 	kelas := r.FormValue("kelas")
 	jurusan := r.FormValue("jurusan")
-	absen := r.FormValue("absen")
 	wali_kelas := r.FormValue("wali_kelas")
-
-	//convert the value of absen into an integer
-	absen_fix, err := strconv.Atoi(absen)
-	if err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to convert from string into an integer for a absen!",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to convert type strings into an integer for a absen!", err.Error())
-		return
-	}
+	absen := r.FormValue("absen")
 
 	//settings the form file to a student profile field in db
 	student_profile_name, header, err := r.FormFile("student_profile")
 	if err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to settings the form file to student profile fields!",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the form file to student profile!", err.Error())
-		return
+		//check if th error is type of missing file error
+		if err == http.ErrMissingFile {
+			//logger the response error for this method
+			logger.Log.Error("Failed to check the error for type missing file error!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to cheking the error type!", err.Error())
+			return
+		}
 	}
 	//because this is the update method, we have to detect if the error is nill, it will be read the file and
 	//put the logic on that condition to make sure if students is right if they not update their students profile
@@ -358,7 +341,7 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to get the file name student profile!", false)
 			return
 		}
-		path_os := "/uploads_student"
+		path_os := "uploadsStudent"
 		if err := os.MkdirAll(path_os, os.ModePerm); err != nil {
 			//logger the response error for this method
 			logger.Log.Error("Failed to settings the os for this file!",
@@ -438,15 +421,31 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	}
 
 	//checking and validate again
-	if payloads.Full_name != nil {
+	if full_name != "" {
 		payloads.Full_name = &full_name
-	} else if payloads.Kelas != nil {
+	}
+	if kelas != "" {
 		payloads.Kelas = &kelas
-	} else if payloads.Jurusan != nil {
+	}
+	if jurusan != "" {
 		payloads.Jurusan = &jurusan
-	} else if payloads.Absen != nil {
+	}
+	if absen != "" {
+		//convert the value of absen into an integer
+		absen_fix, err := strconv.Atoi(absen)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to convert from string into an integer for a absen!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to convert type strings into an integer for a absen!", err.Error())
+			return
+		}
 		payloads.Absen = &absen_fix
-	} else if payloads.Wali_Kelas != nil {
+
+	}
+	if wali_kelas != "" {
 		payloads.Wali_Kelas = &wali_kelas
 	}
 

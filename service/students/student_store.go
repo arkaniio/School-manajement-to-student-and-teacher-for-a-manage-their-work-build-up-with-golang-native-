@@ -136,11 +136,11 @@ func (s *StudentStore) GetStudentById(id uuid.UUID, ctx context.Context) (*types
 
 	//execute the query
 	var students types.Student
-	if err := s.db.GetContext(ctx, id, query, students); err != nil {
+	if err := s.db.GetContext(ctx, &students, query, id); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.New("Failed to get the students by id! result is nil")
+			return nil, errors.New("Failed to get the students by id! result is nil" + err.Error())
 		}
-		return nil, errors.New("Failed to get the students by id!")
+		return nil, errors.New("Failed to get the students by id!" + err.Error())
 	}
 
 	//return final result
