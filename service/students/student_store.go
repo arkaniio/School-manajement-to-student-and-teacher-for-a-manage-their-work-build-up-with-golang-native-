@@ -40,7 +40,7 @@ func (s *StudentStore) CreateNewStudent(ctx context.Context, students *types.Stu
 
 	//query for this func create a new student
 	query := `
-		INSERT INTO students (id, full_name, kelas, jurusan, absen, wali_kelas, student_profile, created_at, updated_at)
+		INSERT INTO students (id, full_name, kelas, jurusan, absen, student_profile, wali_kelas, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING*;
 	`

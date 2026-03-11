@@ -879,3 +879,48 @@
 2026-03-11T12:03:56.721+0800	[31mERROR[0m	runtime/asm_amd64.s:1771	Server error	{"error": "http: Server closed"}
 2026-03-11T12:03:56.721+0800	[34mINFO[0m	runtime/proc.go:290	Server exited properly
 2026-03-11T12:03:56.723+0800	[34mINFO[0m	cmd/main.go:108	Closing database connection...
+2026-03-11T12:06:46.576+0800	[34mINFO[0m	runtime/proc.go:290	Starting application...
+2026-03-11T12:06:46.612+0800	[34mINFO[0m	runtime/proc.go:290	Connecting to PostgreSQL database...
+2026-03-11T12:06:46.826+0800	[34mINFO[0m	runtime/proc.go:290	Database connected successfully	{"database": "School-manajement"}
+2026-03-11T12:06:46.827+0800	[34mINFO[0m	runtime/asm_amd64.s:1771	Starting server	{"port": ":8080"}
+2026-03-11T12:06:54.383+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51525", "status": 201, "duration": 0.1654212}
+2026-03-11T12:07:34.153+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51525", "status": 201, "duration": 0.1484139}
+2026-03-11T12:08:09.113+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51525", "status": 201, "duration": 0.1438766}
+2026-03-11T12:09:35.665+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51601", "status": 201, "duration": 0.151025}
+2026-03-11T12:10:19.094+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51601", "status": 201, "duration": 0.1573334}
+2026-03-11T12:10:56.944+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51601", "status": 201, "duration": 0.1711199}
+2026-03-11T12:11:52.438+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51601", "status": 201, "duration": 0.3523699}
+2026-03-11T12:12:21.259+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51601", "status": 201, "duration": 0.1540247}
+2026-03-11T12:12:51.786+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/register", "ip": "[::1]:51601", "status": 201, "duration": 0.1623471}
+2026-03-11T12:14:13.590+0800	[34mINFO[0m	runtime/proc.go:290	Shutting down server...
+2026-03-11T12:14:13.590+0800	[31mERROR[0m	runtime/asm_amd64.s:1771	Server error	{"error": "http: Server closed"}
+2026-03-11T12:14:13.590+0800	[34mINFO[0m	runtime/proc.go:290	Server exited properly
+2026-03-11T12:14:13.590+0800	[34mINFO[0m	cmd/main.go:108	Closing database connection...
+2026-03-11T12:17:22.682+0800	[34mINFO[0m	runtime/proc.go:290	Starting application...
+2026-03-11T12:17:22.702+0800	[34mINFO[0m	runtime/proc.go:290	Connecting to PostgreSQL database...
+2026-03-11T12:17:22.849+0800	[34mINFO[0m	runtime/proc.go:290	Database connected successfully	{"database": "School-manajement"}
+2026-03-11T12:17:22.849+0800	[34mINFO[0m	runtime/asm_amd64.s:1771	Starting server	{"port": ":8080"}
+2026-03-11T12:18:10.000+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/login", "ip": "[::1]:60188", "status": 200, "duration": 0.2671449}
+2026-03-11T12:19:07.711+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:60188", "status": 201, "duration": 0.0219435}
+2026-03-11T12:21:15.088+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:63077", "status": 201, "duration": 0.00294}
+2026-03-11T12:22:32.054+0800	[34mINFO[0m	runtime/proc.go:290	Shutting down server...
+2026-03-11T12:22:32.055+0800	[31mERROR[0m	runtime/asm_amd64.s:1771	Server error	{"error": "http: Server closed"}
+2026-03-11T12:22:32.055+0800	[34mINFO[0m	runtime/proc.go:290	Server exited properly
+2026-03-11T12:22:32.055+0800	[34mINFO[0m	cmd/main.go:108	Closing database connection...
+2026-03-11T12:22:50.351+0800	[34mINFO[0m	runtime/proc.go:290	Starting application...
+2026-03-11T12:22:50.368+0800	[34mINFO[0m	runtime/proc.go:290	Connecting to PostgreSQL database...
+2026-03-11T12:22:50.632+0800	[34mINFO[0m	runtime/proc.go:290	Database connected successfully	{"database": "School-manajement"}
+2026-03-11T12:22:50.632+0800	[34mINFO[0m	runtime/asm_amd64.s:1771	Starting server	{"port": ":8080"}
+2026-03-11T12:22:56.525+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:61321", "status": 201, "duration": 0.0050818}
+2026-03-11T12:23:31.946+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/login", "ip": "[::1]:61321", "status": 200, "duration": 0.0686124}
+2026-03-11T12:24:16.849+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:61321", "status": 201, "duration": 0.0147347}
+2026-03-11T12:25:12.650+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/login", "ip": "[::1]:61321", "status": 200, "duration": 0.0635238}
+2026-03-11T12:25:42.301+0800	[33mWARN[0m	http/server.go:2286	Missing authorization header	{"request_id": "6491e7eb-cd1b-4e63-8737-6011808b5ded", "client_ip": "[::1]:61321", "path": "/api/v1/student"}
+2026-03-11T12:25:42.301+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:61321", "status": 400, "duration": 0}
+2026-03-11T12:25:50.949+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:61321", "status": 201, "duration": 0.0040094}
+2026-03-11T12:28:10.186+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/login", "ip": "[::1]:59505", "status": 200, "duration": 0.2038158}
+2026-03-11T12:29:26.548+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "POST", "path": "/api/v1/student", "ip": "[::1]:59510", "status": 201, "duration": 0.0037572}
+2026-03-11T12:29:34.105+0800	[34mINFO[0m	runtime/proc.go:290	Shutting down server...
+2026-03-11T12:29:34.105+0800	[31mERROR[0m	runtime/asm_amd64.s:1771	Server error	{"error": "http: Server closed"}
+2026-03-11T12:29:34.105+0800	[34mINFO[0m	runtime/proc.go:290	Server exited properly
+2026-03-11T12:29:34.105+0800	[34mINFO[0m	cmd/main.go:108	Closing database connection...
