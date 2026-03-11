@@ -174,42 +174,42 @@ func (s *StudentStore) UpdateStudentsData(id uuid.UUID, payload types.UpdateAsSt
 	if payload.Full_name != nil {
 		settings = append(settings, fmt.Sprintf("full_name=$%d", argsID))
 		argsID++
-		args = append(args, settings)
+		args = append(args, *payload.Full_name)
 	}
 
 	//if students wants to update their kelas
 	if payload.Kelas != nil {
 		settings = append(settings, fmt.Sprintf("kelas=$%d", argsID))
 		argsID++
-		args = append(args, settings)
+		args = append(args, *payload.Kelas)
 	}
 
 	//if students wants to update their absen
 	if payload.Absen != nil {
 		settings = append(settings, fmt.Sprintf("absen=$%d", argsID))
 		argsID++
-		args = append(args, settings)
+		args = append(args, payload.Absen)
 	}
 
 	//if students wants to update their jurusan
 	if payload.Jurusan != nil {
 		settings = append(settings, fmt.Sprintf("jurusan=$%d", argsID))
 		argsID++
-		args = append(args, settings)
+		args = append(args, payload.Jurusan)
 	}
 
 	//if students wants to update their profile
 	if payload.StudentProfile != nil {
 		settings = append(settings, fmt.Sprintf("student_profile=$%d", argsID))
 		argsID++
-		args = append(args, settings)
+		args = append(args, payload.StudentProfile)
 	}
 
 	//if students wants to update their wali_kelas
 	if payload.Wali_Kelas != nil {
 		settings = append(settings, fmt.Sprintf("wali_kelas=$%d", argsID))
 		argsID++
-		args = append(args, settings)
+		args = append(args, payload.Wali_Kelas)
 	}
 
 	//update the updated at
@@ -249,29 +249,31 @@ func (s *StudentStore) GetAllStudents(ctx context.Context) ([]types.Student, err
 
 	//base query for this method
 	query := `
-		SELECT id, full_name, kelas, jurusan, absen, student_profile, wali_kelas 
+		SELECT id, full_name, kelas, jurusan, absen, student_profile, wali_kelas, created_at, updated_at
 		FROM students;
 	`
 
-	//execute the query
+	//execute the query for this method
 	var students []types.Student
-	rows, err := s.db.QueryxContext(ctx, query, students)
+	rows, err := s.db.QueryxContext(ctx, query)
 	if err != nil {
-		return nil, errors.New("Failed to execute this query!" + err.Error())
+		return nil, errors.New("Failed to get all students data from db!" + err.Error())
 	}
+	//debug
+	fmt.Println(rows)
 
-	//lopping the result of the rows
+	//looping the rows
 	for rows.Next() {
 		var s types.Student
 		if err := rows.StructScan(&s); err != nil {
 			if err == sql.ErrNoRows {
-				return nil, errors.New("Failed to get the students data, now rows affected!" + err.Error())
+				return nil, errors.New("Failed to get all students data, rows nil detected!" + err.Error())
 			}
+			return nil, errors.New("Failed to scan the data of struct students!" + err.Error())
 		}
 		students = append(students, s)
 	}
 
 	//return final result
 	return students, nil
-
 }

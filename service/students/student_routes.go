@@ -513,3 +513,55 @@ func (h *HandleStudentsRequest) ReadFilename_Bp(w http.ResponseWriter, r *http.R
 	http.ServeFile(w, r, file_name)
 
 }
+
+// func to handle the get all students store
+func (h *HandleStudentsRequest) GetAllStudents_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role and validate the role in this method
+	role_students, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the role students!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role students from middleware token!", err.Error())
+		return
+	}
+	if role_students != "guru" && role_students != "admin" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method!", false)
+		return
+	}
+
+	//execute the query
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	students_data, err := h.db.GetAllStudents(ctx)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get all the data of students!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the all of students data!", err.Error())
+		return
+	}
+	//debug
+	fmt.Print(students_data)
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Get all students data has been successfully!", students_data)
+
+}

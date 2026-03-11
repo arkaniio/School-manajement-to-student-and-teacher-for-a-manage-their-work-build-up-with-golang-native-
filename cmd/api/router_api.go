@@ -130,7 +130,12 @@ func (s *ApiServer) Run() error {
 	)
 
 	//router for handle get all students (for now, use this first while i learn about pagination)
-	subRouter.Handle()
+	subRouter.Handle(
+		"/students",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			studentService.GetAllStudents_Bp,
+		)),
+	).Methods("GET")
 
 	//service for a task
 	taskStore := tasks.NewTaskStore(s.db)
