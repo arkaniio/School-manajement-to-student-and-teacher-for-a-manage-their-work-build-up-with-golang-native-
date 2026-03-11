@@ -243,3 +243,35 @@ func (s *StudentStore) UpdateStudentsData(id uuid.UUID, payload types.UpdateAsSt
 	return nil
 
 }
+
+// func to get all the students data
+func (s *StudentStore) GetAllStudents(ctx context.Context) ([]types.Student, error) {
+
+	//base query for this method
+	query := `
+		SELECT id, full_name, kelas, jurusan, absen, student_profile, wali_kelas 
+		FROM students;
+	`
+
+	//execute the query
+	var students []types.Student
+	rows, err := s.db.QueryxContext(ctx, query, students)
+	if err != nil {
+		return nil, errors.New("Failed to execute this query!" + err.Error())
+	}
+
+	//lopping the result of the rows
+	for rows.Next() {
+		var s types.Student
+		if err := rows.StructScan(&s); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, errors.New("Failed to get the students data, now rows affected!" + err.Error())
+			}
+		}
+		students = append(students, s)
+	}
+
+	//return final result
+	return students, nil
+
+}

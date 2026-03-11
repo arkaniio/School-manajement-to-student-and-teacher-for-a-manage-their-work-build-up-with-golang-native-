@@ -12,6 +12,7 @@ type StudentStore interface {
 	DeleteStudents(id uuid.UUID, ctx context.Context) error
 	UpdateStudentsData(id uuid.UUID, payload UpdateAsStudent, ctx context.Context) error
 	GetStudentById(id uuid.UUID, ctx context.Context) (*Student, error)
+	GetAllStudents(ctx context.Context) ([]Student, error)
 }
 
 type Student struct {

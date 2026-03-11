@@ -121,6 +121,17 @@ func (s *ApiServer) Run() error {
 		)),
 	).Methods("PATCH")
 
+	//router for handle func that access the file image of student_profile
+	subRouter.Handle(
+		"/student/{file_name}",
+		http.HandlerFunc(
+			studentService.ReadFilename_Bp,
+		),
+	)
+
+	//router for handle get all students (for now, use this first while i learn about pagination)
+	subRouter.Handle()
+
 	//service for a task
 	taskStore := tasks.NewTaskStore(s.db)
 	taskService := tasks.NewHandlerTask(taskStore)
