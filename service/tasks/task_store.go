@@ -51,8 +51,8 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error 
 
 	//query for create a new task
 	query_task := `
-		INSERT INTO tasks (name_task, file_task, date_task, student_id, created_at, updated_at) 
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO tasks (id, name_task, file_task, date_task, student_id, created_at, updated_at) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING*;
 	`
 
@@ -60,6 +60,7 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error 
 	if err := tx.QueryRowContext(
 		ctx,
 		query_task,
+		task.Id,
 		task.Name_Task,
 		task.File_Task,
 		task.Date_Task,
@@ -67,6 +68,7 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error 
 		task.Created_at,
 		task.Updated_at,
 	).Scan(
+		&task.Id,
 		&task.Name_Task,
 		&task.File_Task,
 		&task.Date_Task,
@@ -85,3 +87,5 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error 
 	return nil
 
 }
+
+//func to delete the tasks data

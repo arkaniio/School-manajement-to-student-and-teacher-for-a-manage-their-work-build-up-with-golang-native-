@@ -2,7 +2,6 @@ package tasks
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -74,16 +73,26 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 
 	//make the formfile for this method and validate if the input user is nill
 	name_task := r.FormValue("name_task")
-	// date_task_payload, err := time.Parse(date_task, "2006-01-02")
-	// if err != nil {
-	// 	//logger the response error for this method
-	// 	logger.Log.Error("Failed to parsing the date task file!",
-	// 		zap.String("request_id", request_id),
-	// 		zap.String("client_ip", r.RemoteAddr),
-	// 	)
-	// 	utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the date task!", err.Error())
-	// 	return
-	// }
+	student_id := r.FormValue("student_id")
+	if name_task == "" && student_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to detect the form file in request", false)
+		return
+	}
+	//convert the student id into an uuid type
+	student_id_fix, err := uuid.Parse(student_id)
+	if err != nil {
+		//logger the response error for this method\
+		logger.Log.Error("Failed to convert into an type uuid!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the student id into an uuid type!", err.Error())
+		return
+	}
+	if student_id_fix == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get settings the student uuid!", false)
+		return
+	}
 
 	//make the form file to input the file task file
 	file_task, header, err := r.FormFile("file_task")
@@ -186,6 +195,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		Name_Task:  name_task,
 		File_Task:  file_path,
 		Date_Task:  time_date_task,
+		Student_Id: student_id_fix,
 		Created_at: time_created,
 		Updated_at: time_updated,
 	}
@@ -199,10 +209,12 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 			zap.String("request_id", request_id),
 			zap.String("client_ip", r.RemoteAddr),
 		)
-		var errors []string
-		for _, Err := range err.(validator.ValidationErrors) {
-			errors = append(errors, fmt.Sprintf("Error detected: %s and %s", Err.Field(), Err.ActualTag()))
+		//use the invalid validation errors for this method
+		if _, ok := err.(*validator.InvalidValidationError); !ok {
+			utils.ResponseError(w, http.StatusBadRequest, "Error detected!", err)
 		}
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the validation error!", err.Error())
+		return
 	}
 
 	//parsing payload into a task main struct
