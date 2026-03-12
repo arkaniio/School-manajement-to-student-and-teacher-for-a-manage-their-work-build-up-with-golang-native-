@@ -241,6 +241,29 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	//validate the task file
+	ctx_id, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	task_data, err := h.db.GetTaskById(tasks.Id, ctx_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get tasks data by id!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task data by id!", err.Error())
+		return
+	}
+	if task_data.File_Task != "" {
+		file_old := task_data.File_Task
+		if _, err := os.Stat(file_old); os.IsNotExist(err) {
+			if err := os.Remove(file_old); err != nil {
+				utils.ResponseError(w, http.StatusBadRequest, "Failed to remove the data!", err.Error())
+				return
+			}
+		}
+	}
+
 	//parsing into a task response
 	task_response := types.ResponseTask{
 		Id:         tasks.Id,

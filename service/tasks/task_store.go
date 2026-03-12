@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -88,4 +89,25 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error 
 
 }
 
-//func to delete the tasks data
+// func to get task by id
+func (s *StoreTask) GetTaskById(id uuid.UUID, ctx context.Context) (*types.Task, error) {
+
+	//base query for this method to handle get task by id
+	query := `
+		SELECT name_task, file_task, date_task, student_id, created_at, updated_at 
+		FROM tasks WHERE id = $1;
+	`
+
+	//execute the func for this method
+	var tasks types.Task
+	if err := s.db.GetContext(ctx, &tasks, query, id); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("Failed to see the rows in db!")
+		}
+		return nil, errors.New("Failed to get the task by id!" + err.Error())
+	}
+
+	//return final result
+	return &tasks, nil
+
+}
