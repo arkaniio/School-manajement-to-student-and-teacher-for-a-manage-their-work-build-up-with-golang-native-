@@ -494,6 +494,13 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 					utils.ResponseError(w, http.StatusBadRequest, "Failed to remove the new data of uploads!", err.Error())
 					return
 				}
+				//logger the response for this method
+				logger.Log.Error("Failed to check the file is exist or not!",
+					zap.String("request_id", requestID),
+					zap.String("client_ip", r.RemoteAddr),
+				)
+				utils.ResponseError(w, http.StatusBadRequest, "Failed to check the file old is exist or not!", err.Error())
+				return
 			}
 		}
 		payload.Profile_Image = &path_final

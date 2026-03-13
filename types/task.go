@@ -11,6 +11,7 @@ type TaskStore interface {
 	CreateNewTasks(ctx context.Context, task *Task) error
 	GetTaskById(id uuid.UUID, ctx context.Context) (*Task, error)
 	DeleteTask(id uuid.UUID, ctx context.Context) error
+	UpdateTask(id uuid.UUID, ctx context.Context, payloads PayloadUpdate) error
 }
 
 type Task struct {
@@ -34,13 +35,13 @@ type Payload struct {
 }
 
 type PayloadUpdate struct {
-	Id         uuid.UUID `json:"id"`
-	Name_Task  *string   `json:"name_task" validate:"required"`
-	File_Task  *string   `json:"file_task" validate:"required"`
-	Date_Task  time.Time `json:"date_task" validate:"required"`
-	Student_Id uuid.UUID `json:"student_id" validate:"required"`
-	Created_at time.Time `json:"created_at" validate:"required"`
-	Updated_at time.Time `json:"updated_at" validate:"required"`
+	Id         uuid.UUID  `json:"id"`
+	Name_Task  *string    `json:"name_task" validate:"required"`
+	File_Task  *string    `json:"file_task" validate:"required"`
+	Date_Task  time.Time  `json:"date_task" validate:"required"`
+	Student_Id *uuid.UUID `json:"student_id" validate:"required"`
+	Created_at time.Time  `json:"created_at" validate:"required"`
+	Updated_at time.Time  `json:"updated_at" validate:"required"`
 }
 
 type ResponseTask struct {

@@ -259,9 +259,21 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		file_old := task_data.File_Task
 		if _, err := os.Stat(file_old); os.IsNotExist(err) {
 			if err := os.Remove(file_old); err != nil {
+				//logger the response error for this method
+				logger.Log.Error("Failed to remove the old file!",
+					zap.String("request_id", request_id),
+					zap.String("client_ip", r.RemoteAddr),
+				)
 				utils.ResponseError(w, http.StatusBadRequest, "Failed to remove the data!", err.Error())
 				return
 			}
+			//logger the response error for this method
+			logger.Log.Error("Failed to check the data is exist or not!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to checking the file is exist or not!", err.Error())
+			return
 		}
 	}
 
@@ -393,5 +405,248 @@ func (h *HandleTaskRequest) Delete_Bp(w http.ResponseWriter, r *http.Request) {
 
 	//return final result
 	utils.ResponseSuccess(w, http.StatusOK, "Delete task has been successfully!", true)
+
+}
+
+// func to handle routes for update tasks students
+func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get request id from middleware token
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get role from middleware token and validate wich role that can access this method
+	role_students, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the role students from middleware",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get role students from middleware token!", err.Error())
+		return
+	}
+	if role_students != "siswa" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method!, invalid role students!", false)
+		return
+	}
+
+	//settings the params for id
+	vars_id := mux.Vars(r)
+	if vars_id == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the id params!", false)
+		return
+	}
+	task_id := vars_id["task_id"]
+	if task_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the user id string for this method!", false)
+		return
+	}
+
+	//parsing into an uuid
+	task_id_fix, err := uuid.Parse(task_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to convert the data into an uuid type!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to convert the type into an uuid type!", err.Error())
+		return
+	}
+	if task_id_fix == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid type for this method!", false)
+		return
+	}
+
+	//settings the http max byte for a request multipart form
+	r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
+
+	//parsing a request for multipart form data
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to parsing the request to a multipart form data type!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing a multipart form data for a client request!", err.Error())
+		return
+	}
+
+	//settings the form value for a multipart form request
+	var payloads types.PayloadUpdate
+	name_task := r.FormValue("name_task")
+	student_id := r.FormValue("student_id")
+
+	//convert the student id into an uuid type
+	student_id_fix, err := uuid.Parse(student_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to parsing the uuid type!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the student id value!", err.Error())
+		return
+	}
+	if student_id_fix == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid student!", false)
+		return
+	}
+
+	//settings for a file task to a file type for a request
+	file_task, header, err := r.FormFile("file_task")
+	if err != nil {
+		if err == http.ErrMissingFile {
+			//logger the response error for this method
+			logger.Log.Error("Failed to check the file is missing or not!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the file task! file is missing", err.Error())
+			return
+		}
+	}
+	if err == nil {
+
+		//make the some places to put the data of the file into it
+		buff := make([]byte, 512)
+		readFile, err := file_task.Read(buff)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to read the file!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to read the length of file!", err.Error())
+			return
+		}
+		if readFile == 0 {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to read the length of file!", false)
+			return
+		}
+
+		//detect the content type
+		content_type := http.DetectContentType(buff)
+		if content_type != "image/jpg" && content_type != "image/jpeg" && content_type != "image/png" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to choose the file tyoe, invalid file type!", false)
+			return
+		}
+
+		//make the filename for this method
+		file_name := uuid.New().String() + header.Filename
+		if file_name == "" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the file_name!", false)
+			return
+		}
+		path_folder := "uploadsTaskUpdate"
+		path_file := filepath.Join(path_folder, file_name)
+		if path_file == "" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to join the path file for this method!", false)
+			return
+		}
+
+		//create the folder into an os
+		dst, err := os.Create(path_file)
+		if err != nil {
+			//logger response error for this method
+			logger.Log.Error("Failed to create the os path for this method!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to create the os path for this method!", err.Error())
+			return
+		}
+		defer dst.Close()
+
+		//copy the file into an io reader
+		copy_file, err := io.Copy(dst, file_task)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to copy the file name into an io reader",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to copy the file into an io reader!", err.Error())
+			return
+		}
+		if copy_file == 0 {
+			utils.ResponseError(w, http.StatusBadRequest, "Invalid length of file task!", false)
+			return
+		}
+
+		//if the task file is exist, it will be replace the old path to the new path in folder
+		//it could be more efficient for a memory in database and our systems
+		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+		defer cancle()
+		task_file_data, err := h.db.GetTaskById(task_id_fix, ctx)
+		if err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to get the task data from task table by id!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task data by id!", err.Error())
+			return
+		}
+		if task_file_data.File_Task != "" {
+			task_file_old := task_file_data.File_Task
+			if _, err := os.Stat(task_file_old); os.IsNotExist(err) {
+				if err := os.Remove(task_file_old); err != nil {
+					//logger the response error for this method
+					logger.Log.Error("Failed to remove the old file!",
+						zap.String("request_id", request_id),
+						zap.String("client_ip", r.RemoteAddr),
+					)
+					utils.ResponseError(w, http.StatusBadGateway, "Failed to remove the old path!", err.Error())
+					return
+				}
+				//logger the response error for this method
+				logger.Log.Error("Failed to check the file is exist or not!",
+					zap.String("request_id", request_id),
+					zap.String("client_ip", r.RemoteAddr),
+				)
+				utils.ResponseError(w, http.StatusBadRequest, "Failed to check the file is exist or not", err.Error())
+				return
+			}
+
+			//parsing into a payload
+			payloads.File_Task = &path_file
+
+		}
+
+	}
+
+	//condition that macth with store
+	if name_task != "" {
+		payloads.Name_Task = &name_task
+	}
+	if student_id != "" {
+		payloads.Student_Id = &student_id_fix
+	}
+
+	//execute the methods from store
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.UpdateTask(task_id_fix, ctx, payloads); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to update the task!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to update the task!", err.Error())
+		return
+	}
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Update task has been successfully!", true)
 
 }

@@ -412,6 +412,13 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 					utils.ResponseError(w, http.StatusBadRequest, "Failed to remove the old path!", err.Error())
 					return
 				}
+				//logger the response error for this method
+				logger.Log.Error("Failed to check the file old is exist or not!",
+					zap.String("request_id", request_id),
+					zap.String("client_ip", r.RemoteAddr),
+				)
+				utils.ResponseError(w, http.StatusBadRequest, "Failed to check the data old file!", err.Error())
+				return
 			}
 		}
 
