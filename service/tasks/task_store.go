@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
 	"github.com/google/uuid"
@@ -154,6 +157,76 @@ func (s *StoreTask) DeleteTask(id uuid.UUID, ctx context.Context) error {
 	//commit the transactions
 	if err := tx.Commit(); err != nil {
 		return errors.New("Failed to commit the transaction!")
+	}
+
+	//return final result
+	return nil
+
+}
+
+// func to handle a update task for this method
+func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types.PayloadUpdate) error {
+
+	//setup the options transaction for this method
+	tx_options := &sql.TxOptions{
+		ReadOnly:  false,
+		Isolation: sql.LevelSerializable,
+	}
+
+	//setup the transaction with sqlx method
+	tx, err := s.db.BeginTxx(ctx, tx_options)
+	if err != nil {
+		return errors.New("Failed to setup the transactions for this method!")
+	}
+	defer tx.Rollback()
+
+	//make the variable to put the every query on it
+	var settings []string
+	argsID := 1
+	var args []interface{}
+
+	//if students wants to update their name task
+	if payloads.Name_Task != nil {
+		settings = append(settings, fmt.Sprintf("name_task=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.Name_Task)
+	}
+
+	//if students wants to update their file_task
+	if payloads.File_Task != nil {
+		settings = append(settings, fmt.Sprintf("file_task=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.File_Task)
+	}
+
+	//update the updated at
+	settings = append(settings, fmt.Sprintf("updated_at=$%d", argsID))
+	argsID++
+	args = append(args, time.Now().UTC())
+
+	//combine the query
+	full_query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = %d", strings.Join(settings, ","), argsID)
+	args = append(args, argsID)
+
+	//execute query for this method
+	result, err := tx.ExecContext(ctx, full_query, args...)
+	if err != nil {
+		return errors.New("Failed to execute the query for this method!")
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("No rows detected!")
+		}
+		return errors.New("Failed to get the rows!")
+	}
+	if rows == 0 {
+		return errors.New("Failed to get the rows from db!")
+	}
+
+	//commit the transaction
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transactions")
 	}
 
 	//return final result
