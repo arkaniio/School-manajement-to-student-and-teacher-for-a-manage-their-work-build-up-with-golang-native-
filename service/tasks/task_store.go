@@ -111,3 +111,46 @@ func (s *StoreTask) GetTaskById(id uuid.UUID, ctx context.Context) (*types.Task,
 	return &tasks, nil
 
 }
+
+// func to delete the data tasks (only students role or role siswa can access this method)
+func (s *StoreTask) DeleteTask(id uuid.UUID, ctx context.Context) error {
+
+	//setup the options transaction for this method
+	tx_options := &sql.TxOptions{
+		ReadOnly:  false,
+		Isolation: sql.LevelSerializable,
+	}
+
+	//setup the transaction with sqlx method
+	tx, err := s.db.BeginTxx(ctx, tx_options)
+	if err != nil {
+		return errors.New("Failed to setup the transactions for this method!")
+	}
+
+	//base query for this method
+	query := `
+		DELETE FROM tasks WHERE id = $1;
+	`
+
+	//execute the query
+	result, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return errors.New("Failed to execute the query for this method!")
+	}
+
+	//scan rows
+	rows, err := result.RowsAffected()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("Failed to detect the rows in db!")
+		}
+		return errors.New("Failed to check the rows in db")
+	}
+	if rows == 0 {
+		return errors.New("Failed to get the rows in db!")
+	}
+
+	//return final result
+	return nil
+
+}
