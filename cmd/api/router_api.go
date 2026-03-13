@@ -165,6 +165,14 @@ func (s *ApiServer) Run() error {
 		),
 	).Methods("GET")
 
+	//router for handle the update task
+	subRouter.Handle(
+		"/task/{task_id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			taskService.UpdateTask_Bp,
+		)),
+	).Methods("PATCH")
+
 	// Create HTTP server
 	s.server = &http.Server{
 		Addr:    s.Addr,
