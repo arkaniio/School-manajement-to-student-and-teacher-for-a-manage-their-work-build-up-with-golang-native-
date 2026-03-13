@@ -149,6 +149,22 @@ func (s *ApiServer) Run() error {
 		)),
 	).Methods("POST")
 
+	//router for handle a task router Delete
+	subRouter.Handle(
+		"/task/{task_id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			taskService.Delete_Bp,
+		)),
+	).Methods("DELETE")
+
+	//router for handle a reade file task
+	subRouter.Handle(
+		"/task/{filename}",
+		http.HandlerFunc(
+			taskService.ReadFile_Bp,
+		),
+	).Methods("GET")
+
 	// Create HTTP server
 	s.server = &http.Server{
 		Addr:    s.Addr,
