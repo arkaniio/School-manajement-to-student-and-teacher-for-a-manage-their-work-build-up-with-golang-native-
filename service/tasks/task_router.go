@@ -281,7 +281,44 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 
 }
 
-//func to see the file task from directory
+// func to see the file task from directory
+func (h *HandleTaskRequest) ReadFile_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the params for a file name to see the file is works to see
+	vars_filename := mux.Vars(r)
+	if vars_filename == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the filename params in url!", false)
+	}
+	filename := vars_filename["filename"]
+	if filename == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the params for a url!", false)
+		return
+	}
+
+	//join the file name with a path folder
+	path_folder := "/uploadsTask"
+	file_path := filepath.Join(path_folder, filename)
+	if file_path == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to join the file path for a task file!", false)
+		return
+	}
+
+	//serve the file to http response
+	http.ServeFile(w, r, file_path)
+
+}
 
 // func to delete the task in this method
 func (h *HandleTaskRequest) Delete_Bp(w http.ResponseWriter, r *http.Request) {
