@@ -14,6 +14,7 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
 
@@ -277,5 +278,83 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 
 	//return final result
 	utils.ResponseSuccess(w, http.StatusOK, "Create a new task has been successfully!", task_response)
+
+}
+
+//func to see the file task from directory
+
+// func to delete the task in this method
+func (h *HandleTaskRequest) Delete_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middlware for this method
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role students from middleware and validate wich role that have to access this method
+	role_students, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the role students from middleware",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role students from middleware!", err.Error())
+		return
+	}
+	if role_students != "siswa" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method, invalid role students!", false)
+		return
+	}
+
+	//get the params for id tasks
+	vars_id := mux.Vars(r)
+	if vars_id == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the params url for a request tasks!", false)
+		return
+	}
+	task_id := vars_id["task_id"]
+	if task_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to put the params on url id!", false)
+		return
+	}
+
+	//convert the params for task id into an uuid
+	task_id_fix, err := uuid.Parse(task_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to convert the type string into an uuid!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to convert the type from string into an uuid!", err.Error())
+	}
+	if task_id_fix == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid parsing data!", false)
+		return
+	}
+
+	//execute the query for this method
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.DeleteTask(task_id_fix, ctx); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to delete the task by id!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to delete the task by id!", err.Error())
+		return
+	}
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Delete task has been successfully!", true)
 
 }

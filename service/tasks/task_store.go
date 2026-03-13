@@ -126,6 +126,7 @@ func (s *StoreTask) DeleteTask(id uuid.UUID, ctx context.Context) error {
 	if err != nil {
 		return errors.New("Failed to setup the transactions for this method!")
 	}
+	defer tx.Rollback()
 
 	//base query for this method
 	query := `
@@ -148,6 +149,11 @@ func (s *StoreTask) DeleteTask(id uuid.UUID, ctx context.Context) error {
 	}
 	if rows == 0 {
 		return errors.New("Failed to get the rows in db!")
+	}
+
+	//commit the transactions
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transaction!")
 	}
 
 	//return final result

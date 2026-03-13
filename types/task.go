@@ -10,6 +10,7 @@ import (
 type TaskStore interface {
 	CreateNewTasks(ctx context.Context, task *Task) error
 	GetTaskById(id uuid.UUID, ctx context.Context) (*Task, error)
+	DeleteTask(id uuid.UUID, ctx context.Context) error
 }
 
 type Task struct {
