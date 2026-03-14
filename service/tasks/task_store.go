@@ -233,3 +233,21 @@ func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types
 	return nil
 
 }
+
+// func to handle a get task by id!
+func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) (*types.Task, error) {
+
+	//base query for get the task by id
+	query := `
+		SELECT * FROM tasks t
+		INNER JOIN students s ON t.student_id = s.id
+		WHERE t.id = $1;
+	`
+
+	//execute the query
+	var tasks types.Task
+	if err := s.db.GetContext(ctx, tasks, query, id); err != nil {
+
+	}
+
+}

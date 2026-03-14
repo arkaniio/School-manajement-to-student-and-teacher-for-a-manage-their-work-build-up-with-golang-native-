@@ -53,3 +53,14 @@ type ResponseTask struct {
 	Created_at string    `json:"created_at"`
 	Updated_at string    `json:"updated_at"`
 }
+
+type ResponseIncludeStudents struct {
+	Id         uuid.UUID `json:"id"`
+	Name_Task  string    `json:"name_task"`
+	File_Task  string    `json:"file_task"`
+	Date_Task  string    `json:"date_task"`
+	Student_Id uuid.UUID `json:"student_id"`
+	Created_at string    `json:"created_at"`
+	Updated_at string    `json:"updated_at"`
+	Students   []Student `json:"students"`
+}
