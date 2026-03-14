@@ -710,6 +710,20 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 		return
 	}
 
+	//execute the query for get task by id
+	// ctx, cancle := context.WithTimeout(r.Context(), time.Second * 10)
+	// defer cancle()
+	// task_id_validate, err := h.db.GetTaskById(id, ctx)
+	// if err != nil {
+	// 	//logger the response error for this method
+	// 	logger.Log.Error("Failed to get the task data by id!",
+	// 		zap.String("request_id", request_id),
+	// 		zap.String("client_ip", r.RemoteAddr),
+	// )
+	// 	utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task data by id!", err.Error())
+	// 	return
+	// }
+
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
