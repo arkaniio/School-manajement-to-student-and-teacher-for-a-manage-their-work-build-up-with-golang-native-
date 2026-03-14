@@ -713,7 +713,7 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 		return
 	}
 	if task_id_fix == uuid.Nil {
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid type for this method!", false)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid type for this methods!", false)
 		return
 	}
 
