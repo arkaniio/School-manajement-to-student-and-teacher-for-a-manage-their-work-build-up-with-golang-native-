@@ -99,6 +99,7 @@ func (h *HandleStudentsRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *h
 		Wali_Kelas:     payloads.Wali_Kelas,
 		Created_at:     payloads.Created_at,
 		Updated_at:     payloads.Updated_at,
+		MapelStudents:  payloads.MapelStudents,
 	}
 
 	//execute the query from student store
@@ -129,6 +130,7 @@ func (h *HandleStudentsRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *h
 		Wali_Kelas:     students.Wali_Kelas,
 		Created_at:     time_created,
 		Updated_at:     time_updated,
+		MapelStudents:  students.MapelStudents,
 	}
 
 	//return final result for this method
@@ -294,6 +296,7 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	jurusan := r.FormValue("jurusan")
 	wali_kelas := r.FormValue("wali_kelas")
 	absen := r.FormValue("absen")
+	mapel_students := r.FormValue("mapel_students")
 
 	//settings the form file to a student profile field in db
 	student_profile_name, header, err := r.FormFile("student_profile")
@@ -454,6 +457,9 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	}
 	if wali_kelas != "" {
 		payloads.Wali_Kelas = &wali_kelas
+	}
+	if mapel_students != "" {
+		payloads.MapelStudents = &mapel_students
 	}
 
 	//execute the query

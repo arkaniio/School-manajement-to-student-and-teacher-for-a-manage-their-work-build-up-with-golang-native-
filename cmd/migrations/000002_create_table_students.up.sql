@@ -9,4 +9,5 @@ CREATE TABLE students (
     wali_kelas      VARCHAR(100) NOT NULL,
     created_at      TIMESTAMP NOT NULL,
     updated_at      TIMESTAMP NOT NULL
+    mapel_students  VARCHAR(255) NOT NULL,
 );

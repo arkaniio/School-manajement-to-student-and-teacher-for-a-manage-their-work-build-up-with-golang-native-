@@ -75,7 +75,8 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	//make the formfile for this method and validate if the input user is nill
 	name_task := r.FormValue("name_task")
 	student_id := r.FormValue("student_id")
-	if name_task == "" && student_id == "" {
+	mapel_task := r.FormValue("mapel_task")
+	if name_task == "" && student_id == "" && mapel_task != "" {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to detect the form file in request", false)
 		return
 	}
@@ -227,6 +228,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		Student_Id: payload.Student_Id,
 		Created_at: payload.Created_at,
 		Updated_at: payload.Updated_at,
+		Mapel_Task: payload.MapelTask,
 	}
 
 	//execute the query from task store
@@ -286,6 +288,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 		Student_Id: tasks.Student_Id,
 		Created_at: time_created_format,
 		Updated_at: time_updated_format,
+		MapelTask:  tasks.Mapel_Task,
 	}
 
 	//return final result
@@ -485,6 +488,7 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 	var payloads types.PayloadUpdate
 	name_task := r.FormValue("name_task")
 	student_id := r.FormValue("student_id")
+	mapel_task := r.FormValue("mapel_task")
 
 	//convert the student id into an uuid type
 	student_id_fix, err := uuid.Parse(student_id)
@@ -631,6 +635,9 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 	}
 	if student_id != "" {
 		payloads.Student_Id = &student_id_fix
+	}
+	if mapel_task != "" {
+		payloads.MapelTask = &mapel_task
 	}
 
 	//execute the methods from store

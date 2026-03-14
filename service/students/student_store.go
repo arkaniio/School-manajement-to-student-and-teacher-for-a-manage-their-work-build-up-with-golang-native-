@@ -41,8 +41,8 @@ func (s *StudentStore) CreateNewStudent(ctx context.Context, students *types.Stu
 
 	//query for this func create a new student
 	query := `
-		INSERT INTO students (id, full_name, kelas, jurusan, absen, student_profile, wali_kelas, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO students (id, full_name, kelas, jurusan, absen, student_profile, wali_kelas, created_at, updated_at, mapel_students)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING*;
 	`
 
@@ -59,6 +59,7 @@ func (s *StudentStore) CreateNewStudent(ctx context.Context, students *types.Stu
 		students.Wali_Kelas,
 		students.Created_at,
 		students.Updated_at,
+		students.MapelStudents,
 	).Scan(
 		&students.Id,
 		&students.Full_Name,
@@ -69,6 +70,7 @@ func (s *StudentStore) CreateNewStudent(ctx context.Context, students *types.Stu
 		&students.Wali_Kelas,
 		&students.Created_at,
 		&students.Updated_at,
+		&students.MapelStudents,
 	); err != nil {
 		return errors.New("Failed to scan the students struct!" + err.Error())
 	}
@@ -131,7 +133,8 @@ func (s *StudentStore) GetStudentById(id uuid.UUID, ctx context.Context) (*types
 
 	//base query for this method
 	query := `
-		SELECT full_name, kelas, jurusan, absen, student_profile, wali_kelas, created_at, updated_at FROM students
+		SELECT full_name, kelas, jurusan, absen, student_profile, wali_kelas, created_at, updated_at, mapel_students
+		FROM students
 		WHERE id = $1;
 	`
 
@@ -188,28 +191,35 @@ func (s *StudentStore) UpdateStudentsData(id uuid.UUID, payload types.UpdateAsSt
 	if payload.Absen != nil {
 		settings = append(settings, fmt.Sprintf("absen=$%d", argsID))
 		argsID++
-		args = append(args, payload.Absen)
+		args = append(args, *payload.Absen)
 	}
 
 	//if students wants to update their jurusan
 	if payload.Jurusan != nil {
 		settings = append(settings, fmt.Sprintf("jurusan=$%d", argsID))
 		argsID++
-		args = append(args, payload.Jurusan)
+		args = append(args, *payload.Jurusan)
 	}
 
 	//if students wants to update their profile
 	if payload.StudentProfile != nil {
 		settings = append(settings, fmt.Sprintf("student_profile=$%d", argsID))
 		argsID++
-		args = append(args, payload.StudentProfile)
+		args = append(args, *payload.StudentProfile)
 	}
 
 	//if students wants to update their wali_kelas
 	if payload.Wali_Kelas != nil {
 		settings = append(settings, fmt.Sprintf("wali_kelas=$%d", argsID))
 		argsID++
-		args = append(args, payload.Wali_Kelas)
+		args = append(args, *payload.Wali_Kelas)
+	}
+
+	//if students wants to update their mapel_students
+	if payload.MapelStudents != nil {
+		settings = append(settings, fmt.Sprintf("mapel_students=$%d", argsID))
+		argsID++
+		args = append(args, *payload.MapelStudents)
 	}
 
 	//update the updated at

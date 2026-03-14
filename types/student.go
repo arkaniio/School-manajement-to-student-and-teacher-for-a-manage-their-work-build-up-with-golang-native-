@@ -25,18 +25,20 @@ type Student struct {
 	Wali_Kelas     string    `db:"wali_kelas"`
 	Created_at     time.Time `db:"created_at"`
 	Updated_at     time.Time `db:"updated_at"`
+	MapelStudents  string    `db:"mapel_students"`
 }
 
 type RegisterAsStudent struct {
 	Id             uuid.UUID `json:"id"`
-	Full_name      string    `json:"full_name"`
-	Kelas          string    `json:"kelas"`
-	Jurusan        string    `json:"jurusan"`
-	Absen          int       `json:"absen"`
+	Full_name      string    `json:"full_name" validate:"required"`
+	Kelas          string    `json:"kelas" validate:"required"`
+	Jurusan        string    `json:"jurusan" validate:"required"`
+	Absen          int       `json:"absen" validate:"required"`
 	StudentProfile string    `json:"student_profile"`
-	Wali_Kelas     string    `json:"wali_kelas"`
+	Wali_Kelas     string    `json:"wali_kelas" validate:"required"`
 	Created_at     time.Time `json:"created_at"`
 	Updated_at     time.Time `json:"updated_at"`
+	MapelStudents  string    `json:"mapel_students" validate:"required"`
 }
 
 type UpdateAsStudent struct {
@@ -49,6 +51,7 @@ type UpdateAsStudent struct {
 	Wali_Kelas     *string   `json:"wali_kelas"`
 	Created_at     time.Time `json:"created_at"`
 	Updated_at     time.Time `json:"updated_at"`
+	MapelStudents  *string   `json:"mapel_students"`
 }
 
 type StudentResponse struct {
@@ -61,4 +64,5 @@ type StudentResponse struct {
 	Wali_Kelas     string    `json:"wali_kelas"`
 	Created_at     string    `json:"created_at"`
 	Updated_at     string    `json:"updated_at"`
+	MapelStudents  string    `json:"mapel_students"`
 }

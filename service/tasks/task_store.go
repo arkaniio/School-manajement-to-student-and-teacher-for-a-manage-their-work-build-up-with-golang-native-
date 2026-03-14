@@ -55,8 +55,8 @@ func (s *StoreTask) CreateNewTasks(ctx context.Context, task *types.Task) error 
 
 	//query for create a new task
 	query_task := `
-		INSERT INTO tasks (id, name_task, file_task, date_task, student_id, created_at, updated_at) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO tasks (id, name_task, file_task, date_task, student_id, created_at, updated_at, mapel_task) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING*;
 	`
 
@@ -97,7 +97,7 @@ func (s *StoreTask) GetTaskById(id uuid.UUID, ctx context.Context) (*types.Task,
 
 	//base query for this method to handle get task by id
 	query := `
-		SELECT name_task, file_task, date_task, student_id, created_at, updated_at 
+		SELECT name_task, file_task, date_task, student_id, created_at, updated_at, mapel_task
 		FROM tasks WHERE id = $1;
 	`
 
@@ -198,6 +198,11 @@ func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types
 		argsID++
 		args = append(args, *payloads.File_Task)
 	}
+	if payloads.MapelTask != nil {
+		settings = append(settings, fmt.Sprintf("mapel_task=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.MapelTask)
+	}
 
 	//update the updated at
 	settings = append(settings, fmt.Sprintf("updated_at=$%d", argsID))
@@ -262,6 +267,7 @@ func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context
 			File_Task:  tasks_scan.File_Task,
 			Date_Task:  tasks_scan.Date_Task,
 			Student_Id: tasks_scan.Student_Id,
+			MapelTask:  tasks_scan.MapelTask,
 			Students: types.Student{
 				Id:             tasks_scan.Student_Id,
 				Full_Name:      tasks_scan.Full_Name,
@@ -272,6 +278,7 @@ func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context
 				Wali_Kelas:     tasks_scan.Wali_Kelas,
 				Created_at:     tasks_scan.Created_at,
 				Updated_at:     tasks_scan.Updated_at,
+				MapelStudents:  tasks_scan.MapelStudents,
 			},
 		}
 		tasks = append(tasks, rows_task)
@@ -310,6 +317,7 @@ func (s *StoreTask) GetAllTaskIncludeStudents(ctx context.Context) ([]types.Task
 			File_Task:  tasks_scan.File_Task,
 			Date_Task:  tasks_scan.Date_Task,
 			Student_Id: tasks_scan.Student_Id,
+			MapelTask:  tasks_scan.MapelTask,
 			Students: types.Student{
 				Id:             tasks_scan.Student_Id,
 				Full_Name:      tasks_scan.Full_Name,
@@ -320,6 +328,7 @@ func (s *StoreTask) GetAllTaskIncludeStudents(ctx context.Context) ([]types.Task
 				Wali_Kelas:     tasks_scan.Wali_Kelas,
 				Created_at:     tasks_scan.Created_at,
 				Updated_at:     tasks_scan.Updated_at,
+				MapelStudents:  tasks_scan.MapelStudents,
 			},
 		}
 		tasks = append(tasks, rows_task)
