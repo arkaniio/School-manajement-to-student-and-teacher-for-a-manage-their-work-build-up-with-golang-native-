@@ -151,11 +151,27 @@ func (s *ApiServer) Run() error {
 
 	//router for handle a task router Delete
 	subRouter.Handle(
-		"/task/{task_id}",
+		"/task/{id}",
 		middleware.TokenIdMiddleware(http.HandlerFunc(
 			taskService.Delete_Bp,
 		)),
 	).Methods("DELETE")
+
+	//router for handle a get task include students
+	subRouter.Handle(
+		"/task/{id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			taskService.GetByIdIncludeStudents_Bp,
+		)),
+	).Methods("GET")
+
+	//router for handle the update task
+	subRouter.Handle(
+		"/task/{id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			taskService.UpdateTask_Bp,
+		)),
+	).Methods("PATCH")
 
 	//router for handle a reade file task
 	subRouter.Handle(
@@ -163,22 +179,6 @@ func (s *ApiServer) Run() error {
 		http.HandlerFunc(
 			taskService.ReadFile_Bp,
 		),
-	).Methods("GET")
-
-	//router for handle the update task
-	subRouter.Handle(
-		"/task/{task_id}",
-		middleware.TokenIdMiddleware(http.HandlerFunc(
-			taskService.UpdateTask_Bp,
-		)),
-	).Methods("PATCH")
-
-	//router for handle a get task include students
-	subRouter.Handle(
-		"/task/{task_id}",
-		middleware.TokenIdMiddleware(http.HandlerFunc(
-			taskService.GetByIdIncludeStudents_Bp,
-		)),
 	).Methods("GET")
 
 	// Create HTTP server

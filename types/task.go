@@ -12,7 +12,7 @@ type TaskStore interface {
 	GetTaskById(id uuid.UUID, ctx context.Context) (*Task, error)
 	DeleteTask(id uuid.UUID, ctx context.Context) error
 	UpdateTask(id uuid.UUID, ctx context.Context, payloads PayloadUpdate) error
-	GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) (*TaskIncludeStudents, error)
+	GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) ([]TaskWithStudents, error)
 }
 
 type Task struct {
@@ -26,12 +26,28 @@ type Task struct {
 }
 
 type TaskIncludeStudents struct {
+	Id             uuid.UUID `db:"id"`
+	NameTask       string    `db:"name_task"`
+	File_Task      string    `db:"file_task"`
+	Date_Task      time.Time `db:"date_task"`
+	Student_Id     uuid.UUID `db:"student_id"`
+	Full_Name      string    `db:"full_name"`
+	Kelas          string    `db:"kelas"`
+	Jurusan        string    `db:"jurusan"`
+	Absen          int       `db:"absen"`
+	StudentProfile string    `db:"student_profile"`
+	Wali_Kelas     string    `db:"wali_kelas"`
+	Created_at     time.Time `db:"created_at"`
+	Updated_at     time.Time `db:"updated_at"`
+}
+
+type TaskWithStudents struct {
 	Id         uuid.UUID `db:"id"`
 	Name_Task  string    `db:"name_task"`
 	File_Task  string    `db:"file_task"`
 	Date_Task  time.Time `db:"date_task"`
 	Student_Id uuid.UUID `db:"student_id"`
-	Students   []Student `db:"students"`
+	Students   Student   `db:"students"`
 	Created_at time.Time `db:"created_at"`
 	Updated_at time.Time `db:"updated_at"`
 }
@@ -62,17 +78,6 @@ type ResponseTask struct {
 	File_Task  string    `json:"file_task"`
 	Date_Task  string    `json:"date_task"`
 	Student_Id uuid.UUID `json:"student_id"`
-	Created_at string    `json:"created_at"`
-	Updated_at string    `json:"updated_at"`
-}
-
-type ResponseIncludeStudents struct {
-	Id         uuid.UUID `json:"id"`
-	Name_Task  string    `json:"name_task"`
-	File_Task  string    `json:"file_task"`
-	Date_Task  string    `json:"date_task"`
-	Student_Id uuid.UUID `json:"student_id"`
-	Students   []Student `json:"students"`
 	Created_at string    `json:"created_at"`
 	Updated_at string    `json:"updated_at"`
 }

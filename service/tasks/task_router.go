@@ -688,7 +688,7 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the params id!", false)
 		return
 	}
-	task_id := vars_id["task_id"]
+	task_id := vars_id["id"]
 	if task_id == "" {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task parameters id!", false)
 		return
@@ -724,24 +724,7 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 		return
 	}
 
-	//formating the tasks data for a date and timestamp
-	date_tasks_format := time.Now().UTC().Format("2006-01-02")
-	updated_at_task_created := time.Now().UTC().Format("2006-01-02")
-	created_at_tasks := time.Now().UTC().Format("2006-01-02")
-
-	//settings the response for this method
-	response_tasks := types.ResponseIncludeStudents{
-		Id:         tasks_data.Id,
-		Name_Task:  tasks_data.Name_Task,
-		File_Task:  tasks_data.File_Task,
-		Date_Task:  date_tasks_format,
-		Student_Id: tasks_data.Student_Id,
-		Students:   tasks_data.Students,
-		Created_at: created_at_tasks,
-		Updated_at: updated_at_task_created,
-	}
-
 	//return final result
-	utils.ResponseSuccess(w, http.StatusOK, "Get data students has been successfully!", response_tasks)
+	utils.ResponseSuccess(w, http.StatusOK, "Get data students has been successfully!", tasks_data)
 
 }

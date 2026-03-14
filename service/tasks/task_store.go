@@ -235,7 +235,7 @@ func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types
 }
 
 // func to handle a get task by id!
-func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) (*types.TaskIncludeStudents, error) {
+func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) ([]types.TaskWithStudents, error) {
 
 	//base query for get the task by id
 	query := `
@@ -245,20 +245,40 @@ func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context
 	`
 
 	//execute the query
-	var tasks types.TaskIncludeStudents
-	rows, err := s.db.Query(query, id)
+	var tasks []types.TaskWithStudents
+	rows, err := s.db.QueryxContext(ctx, query, id)
 	if err != nil {
 		return nil, errors.New("Failed to get the tasks data!")
 	}
+	defer rows.Close()
 	for rows.Next() {
-		var students types.Student
-		if err := rows.Scan(tasks); err != nil {
-			return nil, errors.New("Failed to scan the data in db!")
+		var tasks_scan types.TaskIncludeStudents
+		if err := rows.StructScan(&tasks_scan); err != nil {
+			return nil, errors.New("Failed to scan the data in db! " + err.Error())
 		}
-		tasks.Students = append(tasks.Students, students)
+		rows_task := types.TaskWithStudents{
+			Id:         tasks_scan.Id,
+			Name_Task:  tasks_scan.NameTask,
+			File_Task:  tasks_scan.File_Task,
+			Date_Task:  tasks_scan.Date_Task,
+			Student_Id: tasks_scan.Student_Id,
+			Students: types.Student{
+				Id:             tasks_scan.Student_Id,
+				Full_Name:      tasks_scan.Full_Name,
+				Kelas:          tasks_scan.Kelas,
+				Jurusan:        tasks_scan.Jurusan,
+				Absen:          tasks_scan.Absen,
+				StudentProfile: tasks_scan.StudentProfile,
+				Wali_Kelas:     tasks_scan.Wali_Kelas,
+				Created_at:     tasks_scan.Created_at,
+				Updated_at:     tasks_scan.Updated_at,
+			},
+		}
+		tasks = append(tasks, rows_task)
+
 	}
 
 	//return final result
-	return &tasks, nil
+	return tasks, nil
 
 }
