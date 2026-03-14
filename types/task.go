@@ -12,6 +12,7 @@ type TaskStore interface {
 	GetTaskById(id uuid.UUID, ctx context.Context) (*Task, error)
 	DeleteTask(id uuid.UUID, ctx context.Context) error
 	UpdateTask(id uuid.UUID, ctx context.Context, payloads PayloadUpdate) error
+	GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) (*TaskIncludeStudents, error)
 }
 
 type Task struct {

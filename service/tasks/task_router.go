@@ -650,3 +650,98 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 	utils.ResponseSuccess(w, http.StatusOK, "Update task has been successfully!", true)
 
 }
+
+// func to handle the get task by id that includes the students
+func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role from middleware
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the role from middleware!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role from middleware", err.Error())
+		return
+	}
+	if role != "guru" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method!, invalid role!", false)
+		return
+	}
+
+	//get the id from params url
+	vars_id := mux.Vars(r)
+	if vars_id == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the params id!", false)
+		return
+	}
+	task_id := vars_id["task_id"]
+	if task_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task parameters id!", false)
+		return
+	}
+
+	//parsing into an uuid
+	task_id_fix, err := uuid.Parse(task_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to parsing into an uuid type!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the data into an uuid type!", err.Error())
+		return
+	}
+	if task_id_fix == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid type for this method!", false)
+		return
+	}
+
+	//execute the query
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	tasks_data, err := h.db.GetTaskByIdIncludeStudents(task_id_fix, ctx)
+	if err != nil {
+		//logger the responnse error for this method
+		logger.Log.Error("Failed to get the task data for this method!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task data from table db!", err.Error())
+		return
+	}
+
+	//formating the tasks data for a date and timestamp
+	date_tasks_format := time.Now().UTC().Format("2006-01-02")
+	updated_at_task_created := time.Now().UTC().Format("2006-01-02")
+	created_at_tasks := time.Now().UTC().Format("2006-01-02")
+
+	//settings the response for this method
+	response_tasks := types.ResponseIncludeStudents{
+		Id:         tasks_data.Id,
+		Name_Task:  tasks_data.Name_Task,
+		File_Task:  tasks_data.File_Task,
+		Date_Task:  date_tasks_format,
+		Student_Id: tasks_data.Student_Id,
+		Students:   tasks_data.Students,
+		Created_at: created_at_tasks,
+		Updated_at: updated_at_task_created,
+	}
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Get data students has been successfully!", response_tasks)
+
+}
