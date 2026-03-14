@@ -235,7 +235,7 @@ func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types
 }
 
 // func to handle a get task by id!
-func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) (*types.Task, error) {
+func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) (*types.TaskIncludeStudents, error) {
 
 	//base query for get the task by id
 	query := `
@@ -245,9 +245,20 @@ func (s *StoreTask) GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context
 	`
 
 	//execute the query
-	var tasks types.Task
-	if err := s.db.GetContext(ctx, tasks, query, id); err != nil {
-
+	var tasks types.TaskIncludeStudents
+	rows, err := s.db.Query(query, id)
+	if err != nil {
+		return nil, errors.New("Failed to get the tasks data!")
 	}
+	for rows.Next() {
+		var students types.Student
+		if err := rows.Scan(tasks); err != nil {
+			return nil, errors.New("Failed to scan the data in db!")
+		}
+		tasks.Students = append(tasks.Students, students)
+	}
+
+	//return final result
+	return &tasks, nil
 
 }

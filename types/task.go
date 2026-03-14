@@ -24,6 +24,17 @@ type Task struct {
 	Updated_at time.Time `db:"updated_at"`
 }
 
+type TaskIncludeStudents struct {
+	Id         uuid.UUID `db:"id"`
+	Name_Task  string    `db:"name_task"`
+	File_Task  string    `db:"file_task"`
+	Date_Task  time.Time `db:"date_task"`
+	Student_Id uuid.UUID `db:"student_id"`
+	Students   []Student `db:"students"`
+	Created_at time.Time `db:"created_at"`
+	Updated_at time.Time `db:"updated_at"`
+}
+
 type Payload struct {
 	Id         uuid.UUID `json:"id"`
 	Name_Task  string    `json:"name_task" validate:"required"`
@@ -60,7 +71,7 @@ type ResponseIncludeStudents struct {
 	File_Task  string    `json:"file_task"`
 	Date_Task  string    `json:"date_task"`
 	Student_Id uuid.UUID `json:"student_id"`
+	Students   []Student `json:"students"`
 	Created_at string    `json:"created_at"`
 	Updated_at string    `json:"updated_at"`
-	Students   []Student `json:"students"`
 }
