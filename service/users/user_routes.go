@@ -384,12 +384,12 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 	//declare the form file for profile image
 	file_image, header, err := r.FormFile("profile_image")
 	if err != nil {
-		//logger the data response
-		logger.Log.Error("Failed to get the profile image",
-			zap.String("request_id", requestID),
-			zap.String("client_ip", r.RemoteAddr),
-		)
 		if err != http.ErrMissingFile {
+			//logger the data response
+			logger.Log.Error("Failed to get the profile image",
+				zap.String("request_id", requestID),
+				zap.String("client_ip", r.RemoteAddr),
+			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to detect profile image!", err.Error())
 			return
 		}

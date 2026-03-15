@@ -291,18 +291,18 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 
 	//declare the variable form file
 	var payloads types.UpdateAsStudent
+	mapel_students := r.FormValue("mapel_students")
 	full_name := r.FormValue("full_name")
 	kelas := r.FormValue("kelas")
 	jurusan := r.FormValue("jurusan")
 	wali_kelas := r.FormValue("wali_kelas")
 	absen := r.FormValue("absen")
-	mapel_students := r.FormValue("mapel_students")
 
 	//settings the form file to a student profile field in db
 	student_profile_name, header, err := r.FormFile("student_profile")
 	if err != nil {
 		//check if th error is type of missing file error
-		if err == http.ErrMissingFile {
+		if err != http.ErrMissingFile {
 			//logger the response error for this method
 			logger.Log.Error("Failed to check the error for type missing file error!",
 				zap.String("request_id", request_id),
@@ -407,7 +407,7 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 			path_old := students.StudentProfile
 			if _, err := os.Stat(path_old); os.IsNotExist(err) {
 				if err := os.Remove(path_old); err != nil {
-					//logger the response error for this method
+					// //logger the response error for this method
 					logger.Log.Error("Failed to remove the data old from db!",
 						zap.String("request_id", request_id),
 						zap.String("client_ip", r.RemoteAddr),
@@ -431,6 +431,9 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	}
 
 	//checking and validate again
+	if mapel_students != "" {
+		payloads.MapelStudents = &mapel_students
+	}
 	if full_name != "" {
 		payloads.Full_name = &full_name
 	}
@@ -457,9 +460,6 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	}
 	if wali_kelas != "" {
 		payloads.Wali_Kelas = &wali_kelas
-	}
-	if mapel_students != "" {
-		payloads.MapelStudents = &mapel_students
 	}
 
 	//execute the query
