@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
+	"github.com/ArkaniLoveCoding/Shcool-manajement/service/absensis"
 	serviceStudent "github.com/ArkaniLoveCoding/Shcool-manajement/service/students"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/service/tasks"
 	serviceUser "github.com/ArkaniLoveCoding/Shcool-manajement/service/users"
@@ -188,6 +189,18 @@ func (s *ApiServer) Run() error {
 			taskService.ReadFile_Bp,
 		),
 	).Methods("GET")
+
+	//absensi service
+	absensiStore := absensis.NewHandlerStoreAbsensi(s.db)
+	absensiService := absensis.NewHandlerAbsensi(absensiStore)
+
+	//routes for handle create new absensis
+	subRouter.Handle(
+		"/absensi",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			absensiService.CreateNewAbsensi_Bp,
+		)),
+	).Methods("POST")
 
 	// Create HTTP server
 	s.server = &http.Server{

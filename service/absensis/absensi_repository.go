@@ -20,7 +20,7 @@ func NewHandlerStoreAbsensi(db *sqlx.DB) *StoreAbsensi {
 }
 
 // func to make the new absensi
-func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.PayloadAbsensis) error {
+func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Absensi) error {
 
 	//make the transactions method
 	//setup the options for a transaction
@@ -38,26 +38,88 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Pay
 
 	//base query
 	query := `
-		INSERT INTO absensis (id, name_lengkap, kelas, jurusan, hari, tanngal, status, keterangan, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+		INSERT INTO absensis (id, name_lengkap, kelas, jurusan, hari, tanggal, status, keterangan, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		RETURNING*;
 	`
 
 	//execute the query
-	result, err := tx.ExecContext(ctx, query, payloads)
+	if err := tx.QueryRowxContext(
+		ctx,
+		query,
+		payloads.Id,
+		payloads.NameLengkap,
+		payloads.Kelas,
+		payloads.Jurusan,
+		payloads.Hari,
+		payloads.Tanggal,
+		payloads.Status,
+		payloads.Keterangan,
+		payloads.Created_at,
+		payloads.Updated_at,
+	).Scan(
+		&payloads.Id,
+		&payloads.NameLengkap,
+		&payloads.Kelas,
+		&payloads.Jurusan,
+		&payloads.Hari,
+		&payloads.Tanggal,
+		&payloads.Status,
+		&payloads.Keterangan,
+		&payloads.Created_at,
+		&payloads.Updated_at,
+	); err != nil {
+		return errors.New("Failed to execute the query!" + err.Error())
+	}
+
+	//commit the transaction
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transaction")
+	}
+
+	return nil
+
+}
+
+// func to update the absensis especially in part of status
+func (s *StoreAbsensi) UpdateStatusAbsensi(ctx context.Context, status string) error {
+
+	//setup the options for a transaction
+	option_tx := &sql.TxOptions{
+		Isolation: sql.LevelSerializable,
+		ReadOnly:  false,
+	}
+
+	//begin the transaction for this method
+	tx, err := s.db.BeginTxx(ctx, option_tx)
 	if err != nil {
-		return errors.New("Failed to execute the query!")
+		return errors.New("Failed to setup the transaction for this method!")
+	}
+	defer tx.Rollback()
+
+	//base query
+	query := `
+		UPDATE absensis SET status = $1;
+	`
+
+	result, err := tx.ExecContext(ctx, query, status)
+	if err != nil {
+		return errors.New("Failed to update the status!")
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("Failed to detect the rows into an db")
-		}
-		return errors.New("Failed to get the rows into an db!")
+		return errors.New("Failed to detect the rows affected based on db")
 	}
 	if rows == 0 {
-		return errors.New("Failed to detect the rows in db!")
+		return errors.New("Invalid rows!")
 	}
 
+	//commit the transactions
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transaction")
+	}
+
+	//return final result based on returning in this method or func
 	return nil
 
 }

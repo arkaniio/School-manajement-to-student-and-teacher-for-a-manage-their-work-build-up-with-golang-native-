@@ -8,7 +8,8 @@ import (
 )
 
 type AbsensiStore interface {
-	CreateNewAbsensi(ctx context.Context, payloads *PayloadAbsensis) error
+	CreateNewAbsensi(ctx context.Context, payloads *Absensi) error
+	UpdateStatusAbsensi(ctx context.Context, status string) error
 }
 
 type Absensi struct {

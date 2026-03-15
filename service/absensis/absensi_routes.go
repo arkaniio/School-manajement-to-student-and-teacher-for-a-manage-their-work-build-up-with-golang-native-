@@ -11,6 +11,7 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/utils"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -82,10 +83,42 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
+	//parsing into struct absensi
+	absensi := &types.Absensi{
+		Id:          uuid.New(),
+		NameLengkap: payloads.NameLengkap,
+		Kelas:       payloads.Kelas,
+		Jurusan:     payloads.Jurusan,
+		Hari:        payloads.Hari,
+		Tanggal:     payloads.Tanggal,
+		Status:      payloads.Status,
+		Keterangan:  payloads.Keterangan,
+		Created_at:  payloads.Created_at,
+		Updated_at:  payloads.Updated_at,
+	}
+
+	//validate if payloads keterangan is hadir tidak hadir dan izin
+	if absensi.Keterangan == "hadir" {
+
+		//update the status set the status is accepted
+		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+		defer cancle()
+		if err := h.db.UpdateStatusAbsensi(ctx, "accepted"); err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to update the status!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the status absensi is failed!", err.Error())
+			return
+		}
+
+	}
+
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.CreateNewAbsensi(ctx, &payloads); err != nil {
+	if err := h.db.CreateNewAbsensi(ctx, absensi); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to create the new absensi for students!",
 			zap.String("request_id", request_id),
@@ -101,14 +134,14 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 
 	//make the response for this method
 	response_absensi := types.AbsensiResponse{
-		Id:          payloads.Id,
-		NameLengkap: payloads.NameLengkap,
-		Kelas:       payloads.Kelas,
-		Jurusan:     payloads.Jurusan,
-		Hari:        payloads.Hari,
-		Tanggal:     payloads.Tanggal,
-		Status:      payloads.Status,
-		Keterangan:  payloads.Keterangan,
+		Id:          absensi.Id,
+		NameLengkap: absensi.NameLengkap,
+		Kelas:       absensi.Kelas,
+		Jurusan:     absensi.Jurusan,
+		Hari:        absensi.Hari,
+		Tanggal:     absensi.Tanggal,
+		Status:      absensi.Status,
+		Keterangan:  absensi.Keterangan,
 		Created_at:  time_created,
 		Updated_at:  time_updated,
 	}
