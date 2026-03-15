@@ -1,12 +1,14 @@
 package types
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type AbsensiStore interface {
+	CreateNewAbsensi(ctx context.Context, payloads *PayloadAbsensis) error
 }
 
 type Absensi struct {
