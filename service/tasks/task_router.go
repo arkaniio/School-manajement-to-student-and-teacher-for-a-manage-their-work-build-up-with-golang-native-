@@ -192,7 +192,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	time_date_task_format := time.Now().UTC().Format("2006-01-02")
 
 	//parsing into a payload
-	payload := types.Payload{
+	payload := types.PayloadTask{
 		Id:         uuid.New(),
 		Name_Task:  name_task,
 		File_Task:  file_path,

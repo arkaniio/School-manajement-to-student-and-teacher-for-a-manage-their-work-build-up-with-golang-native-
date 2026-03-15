@@ -57,7 +57,7 @@ type TaskWithStudents struct {
 	MapelTask  string    `db:"mapel_task"`
 }
 
-type Payload struct {
+type PayloadTask struct {
 	Id         uuid.UUID `json:"id"`
 	Name_Task  string    `json:"name_task" validate:"required"`
 	File_Task  string    `json:"file_task" validate:"required"`
