@@ -198,6 +198,8 @@ func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types
 		argsID++
 		args = append(args, *payloads.File_Task)
 	}
+
+	//if students wants to update their mapel task
 	if payloads.MapelTask != nil {
 		settings = append(settings, fmt.Sprintf("mapel_task=$%d", argsID))
 		argsID++
@@ -210,13 +212,13 @@ func (s *StoreTask) UpdateTask(id uuid.UUID, ctx context.Context, payloads types
 	args = append(args, time.Now().UTC())
 
 	//combine the query
-	full_query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = %d", strings.Join(settings, ","), argsID)
-	args = append(args, argsID)
+	full_query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = $%d", strings.Join(settings, ","), argsID)
+	args = append(args, id)
 
 	//execute query for this method
 	result, err := tx.ExecContext(ctx, full_query, args...)
 	if err != nil {
-		return errors.New("Failed to execute the query for this method!")
+		return errors.New("Failed to execute the query for this method!" + err.Error())
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {

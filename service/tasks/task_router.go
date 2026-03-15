@@ -448,7 +448,7 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the id params!", false)
 		return
 	}
-	task_id := vars_id["task_id"]
+	task_id := vars_id["id"]
 	if task_id == "" {
 		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the user id string for this method!", false)
 		return
@@ -487,29 +487,12 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 	//settings the form value for a multipart form request
 	var payloads types.PayloadUpdate
 	name_task := r.FormValue("name_task")
-	student_id := r.FormValue("student_id")
 	mapel_task := r.FormValue("mapel_task")
-
-	//convert the student id into an uuid type
-	student_id_fix, err := uuid.Parse(student_id)
-	if err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to parsing the uuid type!",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the student id value!", err.Error())
-		return
-	}
-	if student_id_fix == uuid.Nil {
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the uuid student!", false)
-		return
-	}
 
 	//settings for a file task to a file type for a request
 	file_task, header, err := r.FormFile("file_task")
 	if err != nil {
-		if err == http.ErrMissingFile {
+		if err != http.ErrMissingFile {
 			//logger the response error for this method
 			logger.Log.Error("Failed to check the file is missing or not!",
 				zap.String("request_id", request_id),
@@ -633,9 +616,6 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 	if name_task != "" {
 		payloads.Name_Task = &name_task
 	}
-	if student_id != "" {
-		payloads.Student_Id = &student_id_fix
-	}
 	if mapel_task != "" {
 		payloads.MapelTask = &mapel_task
 	}
@@ -717,20 +697,6 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 		return
 	}
 
-	//execute the query for get task by id
-	// ctx, cancle := context.WithTimeout(r.Context(), time.Second * 10)
-	// defer cancle()
-	// task_id_validate, err := h.db.GetTaskById(id, ctx)
-	// if err != nil {
-	// 	//logger the response error for this method
-	// 	logger.Log.Error("Failed to get the task data by id!",
-	// 		zap.String("request_id", request_id),
-	// 		zap.String("client_ip", r.RemoteAddr),
-	// )
-	// 	utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task data by id!", err.Error())
-	// 	return
-	// }
-
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
@@ -747,5 +713,55 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 
 	//return final result
 	utils.ResponseSuccess(w, http.StatusOK, "Get data students has been successfully!", tasks_data)
+
+}
+
+// func to getall task include students
+func (h *HandleTaskRequest) GetAllTaskIncludeStudents_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role from middleware
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the role from middleware!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role from middleware", err.Error())
+		return
+	}
+	if role != "guru" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method!, invalid role!", false)
+		return
+	}
+
+	//execute the query
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	tasks_data, err := h.db.GetAllTaskIncludeStudents(ctx)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the tasks data!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the task data from db!", err.Error())
+		return
+	}
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Get all task has been successfully!", tasks_data)
 
 }

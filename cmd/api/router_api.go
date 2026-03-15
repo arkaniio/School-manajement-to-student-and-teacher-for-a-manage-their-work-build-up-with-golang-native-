@@ -149,6 +149,14 @@ func (s *ApiServer) Run() error {
 		)),
 	).Methods("POST")
 
+	//router for handle get all tasks include students
+	subRouter.Handle(
+		"/tasks",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			taskService.GetAllTaskIncludeStudents_Bp,
+		)),
+	).Methods("GET")
+
 	//router for handle a task router Delete
 	subRouter.Handle(
 		"/task/{id}",

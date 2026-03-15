@@ -13,6 +13,7 @@ type TaskStore interface {
 	DeleteTask(id uuid.UUID, ctx context.Context) error
 	UpdateTask(id uuid.UUID, ctx context.Context, payloads PayloadUpdate) error
 	GetTaskByIdIncludeStudents(id uuid.UUID, ctx context.Context) ([]TaskWithStudents, error)
+	GetAllTaskIncludeStudents(ctx context.Context) ([]TaskWithStudents, error)
 }
 
 type Task struct {
@@ -68,14 +69,13 @@ type Payload struct {
 }
 
 type PayloadUpdate struct {
-	Id         uuid.UUID  `json:"id"`
-	Name_Task  *string    `json:"name_task"`
-	File_Task  *string    `json:"file_task"`
-	Date_Task  time.Time  `json:"date_task"`
-	Student_Id *uuid.UUID `json:"student_id"`
-	Created_at time.Time  `json:"created_at"`
-	Updated_at time.Time  `json:"updated_at"`
-	MapelTask  *string    `json:"mapel_task"`
+	Id         uuid.UUID `json:"id"`
+	Name_Task  *string   `json:"name_task"`
+	File_Task  *string   `json:"file_task"`
+	Date_Task  time.Time `json:"date_task"`
+	Created_at time.Time `json:"created_at"`
+	Updated_at time.Time `json:"updated_at"`
+	MapelTask  *string   `json:"mapel_task"`
 }
 
 type ResponseTask struct {
