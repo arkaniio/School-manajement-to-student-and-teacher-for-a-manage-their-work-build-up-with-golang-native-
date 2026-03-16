@@ -10,6 +10,7 @@ import (
 type AbsensiStore interface {
 	CreateNewAbsensi(ctx context.Context, payloads *Absensi) error
 	UpdateStatusAbsensi(ctx context.Context, status string) error
+	UpdateKeteranganTidakHadirAbsensi(ctx context.Context, keterangan_tidak_hadir string) error
 }
 
 type Absensi struct {
