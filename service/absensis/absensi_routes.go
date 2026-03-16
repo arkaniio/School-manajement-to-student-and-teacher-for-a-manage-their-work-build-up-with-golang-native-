@@ -97,7 +97,7 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 		Updated_at:  payloads.Updated_at,
 	}
 
-	//validate if payloads keterangan is hadir tidak hadir dan izin
+	//validate if payloads keterangan is hadir
 	if absensi.Keterangan == "hadir" {
 
 		//update the status set the status is accepted
@@ -110,6 +110,24 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 				zap.String("client_ip", r.RemoteAddr),
 			)
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the status absensi is failed!", err.Error())
+			return
+		}
+
+	}
+
+	//validate if the status is default tidak hadir
+	if absensi.Keterangan == "tidak hadir" {
+
+		//update the status is not accepted
+		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+		defer cancle()
+		if err := h.db.UpdateStatusAbsensi(ctx, "not accepted!"); err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to update the status absensi!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the absensi status!", err.Error())
 			return
 		}
 
