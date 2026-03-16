@@ -9,8 +9,9 @@ import (
 
 type AbsensiStore interface {
 	CreateNewAbsensi(ctx context.Context, payloads *Absensi) error
-	UpdateStatusAbsensi(ctx context.Context, status string) error
-	UpdateKeteranganTidakHadirAbsensi(ctx context.Context, keterangan_tidak_hadir string) error
+	UpdateStatusAbsensi(id uuid.UUID, ctx context.Context, status string) error
+	UpdateKeteranganTidakHadirAbsensi(id uuid.UUID, ctx context.Context, keterangan_tidak_hadir string) error
+	GetAbsensiById(id uuid.UUID, ctx context.Context) (*Absensi, error)
 }
 
 type Absensi struct {

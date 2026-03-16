@@ -4,8 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -38,8 +41,7 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Abs
 
 	//base query
 	query := `
-		INSERT INTO absensis (id, name_lengkap, kelas, jurusan, hari, tanggal, status, keterangan, created_at, updated_at
-		keterangan_tidak_hadir, keterangan_dispen, file_dispen)
+		INSERT INTO absensis (id, name_lengkap, kelas, jurusan, hari, tanggal, status, keterangan, created_at, updated_at, keterangan_tidak_hadir, keterangan_dispen, file_dispen)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		RETURNING*;
 	`
@@ -58,6 +60,9 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Abs
 		payloads.Keterangan,
 		payloads.Created_at,
 		payloads.Updated_at,
+		payloads.KeteranganTidakHadir,
+		payloads.KeteranganDispen,
+		payloads.FileDispen,
 	).Scan(
 		&payloads.Id,
 		&payloads.NameLengkap,
@@ -69,6 +74,9 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Abs
 		&payloads.Keterangan,
 		&payloads.Created_at,
 		&payloads.Updated_at,
+		&payloads.KeteranganTidakHadir,
+		&payloads.KeteranganDispen,
+		&payloads.FileDispen,
 	); err != nil {
 		return errors.New("Failed to execute the query!" + err.Error())
 	}
@@ -83,7 +91,7 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Abs
 }
 
 // func to update the absensis especially in part of status
-func (s *StoreAbsensi) UpdateStatusAbsensi(ctx context.Context, status string) error {
+func (s *StoreAbsensi) UpdateStatusAbsensi(id uuid.UUID, ctx context.Context, status string) error {
 
 	//setup the options for a transaction
 	option_tx := &sql.TxOptions{
@@ -98,18 +106,30 @@ func (s *StoreAbsensi) UpdateStatusAbsensi(ctx context.Context, status string) e
 	}
 	defer tx.Rollback()
 
-	//base query
-	query := `
-		UPDATE absensis SET status = $1;
-	`
+	//make the variable
+	var args []interface{}
+	var settings []string
+	argsID := 1
 
-	result, err := tx.ExecContext(ctx, query, status)
+	//base query
+	if status != "" {
+		settings = append(settings, fmt.Sprintf("status=$%d", argsID))
+		argsID++
+		args = append(args, status)
+	}
+
+	//full query
+	full_query := fmt.Sprintf("UPDATE absensis SET %s WHERE id = $%d", strings.Join(settings, ","), argsID)
+	args = append(args, id)
+
+	//execute the query
+	result, err := tx.ExecContext(ctx, full_query, args...)
 	if err != nil {
-		return errors.New("Failed to update the status!")
+		return errors.New("Failed to update the status!" + err.Error())
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return errors.New("Failed to detect the rows affected based on db")
+		return errors.New("Failed to detect the rows affected based on db" + err.Error())
 	}
 	if rows == 0 {
 		return errors.New("Invalid rows!")
@@ -126,7 +146,7 @@ func (s *StoreAbsensi) UpdateStatusAbsensi(ctx context.Context, status string) e
 }
 
 // func to update the keterangan tidak hadir at absensis table
-func (s *StoreAbsensi) UpdateKeteranganTidakHadirAbsensi(ctx context.Context, keterangan_tidak_hadir string) error {
+func (s *StoreAbsensi) UpdateKeteranganTidakHadirAbsensi(id uuid.UUID, ctx context.Context, keterangan_tidak_hadir string) error {
 
 	//setup the options for a transaction
 	option_tx := &sql.TxOptions{
@@ -141,14 +161,26 @@ func (s *StoreAbsensi) UpdateKeteranganTidakHadirAbsensi(ctx context.Context, ke
 	}
 	defer tx.Rollback()
 
-	//base query
-	query := `
-		UPDATE absensis SET keterangan_tida_hadir = $1;
-	`
+	//make the variable
+	var args []interface{}
+	var settings []string
+	argsID := 1
 
-	result, err := tx.ExecContext(ctx, query, keterangan_tidak_hadir)
+	//base query
+	if keterangan_tidak_hadir != "" {
+		settings = append(settings, fmt.Sprintf("status=$%d", argsID))
+		argsID++
+		args = append(args, keterangan_tidak_hadir)
+	}
+
+	//full query
+	full_query := fmt.Sprintf("UPDATE absensis SET %s WHERE id = $%d", strings.Join(settings, ","), argsID)
+	args = append(args, id)
+
+	//execute the query
+	result, err := tx.ExecContext(ctx, full_query, keterangan_tidak_hadir)
 	if err != nil {
-		return errors.New("Failed to update the status!")
+		return errors.New("Failed to update the keterangan_tidak_hadir!")
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
@@ -165,5 +197,28 @@ func (s *StoreAbsensi) UpdateKeteranganTidakHadirAbsensi(ctx context.Context, ke
 
 	//return final result based on returning in this method or func
 	return nil
+
+}
+
+func (s *StoreAbsensi) GetAbsensiById(id uuid.UUID, ctx context.Context) (*types.Absensi, error) {
+
+	//query
+	query := `
+		SELECT id, name_lengkap, kelas, jurusan, hari, tanggal, status, keterangan,
+			   created_at, updated_at, keterangan_tidak_hadir, keterangan_dispen, file_dispen
+		FROM absensis WHERE id = $1;
+	`
+
+	//execute the query
+	var absensis types.Absensi
+	if err := s.db.GetContext(ctx, &absensis, query, id); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("invalid rows!")
+		}
+		return nil, errors.New("Failed to get the absensis data by id!" + err.Error())
+	}
+
+	//return final result
+	return &absensis, nil
 
 }

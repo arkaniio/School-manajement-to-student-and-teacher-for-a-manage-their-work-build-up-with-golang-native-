@@ -100,13 +100,40 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 		FileDispen:           payloads.FileDispen,
 	}
 
+	//execute the query
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.CreateNewAbsensi(ctx, absensi); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to create the new absensi for students!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to create the new absensi for the students!", err.Error())
+		return
+	}
+
+	// //get the absensis by id
+	ctx_get_id, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	absensis, err := h.db.GetAbsensiById(absensi.Id, ctx_get_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get absensi data by id!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get absensi by id!", err.Error())
+		return
+	}
+
 	//validate if payloads keterangan is hadir
-	if absensi.Keterangan == "hadir" {
+	if absensis.Keterangan == "hadir" {
 
 		//update the status set the status is accepted
 		ctx_status, cancle := context.WithTimeout(r.Context(), time.Second*10)
 		defer cancle()
-		if err := h.db.UpdateStatusAbsensi(ctx_status, "accepted"); err != nil {
+		if err := h.db.UpdateStatusAbsensi(absensi.Id, ctx_status, "accepted"); err != nil {
 			//logger the response error for this method
 			logger.Log.Error("Failed to update the status!",
 				zap.String("request_id", request_id),
@@ -119,12 +146,12 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 	}
 
 	//validate if the status is default tidak hadir
-	if absensi.Keterangan == "tidak hadir" {
+	if absensis.Keterangan == "tidak hadir" {
 
 		//update the status is not accepted
 		ctx_status, cancle := context.WithTimeout(r.Context(), time.Second*10)
 		defer cancle()
-		if err := h.db.UpdateStatusAbsensi(ctx_status, "not accepted!"); err != nil {
+		if err := h.db.UpdateStatusAbsensi(absensi.Id, ctx_status, "not accepted!"); err != nil {
 			//logger the response error for this method
 			logger.Log.Error("Failed to update the status absensi!",
 				zap.String("request_id", request_id),
@@ -134,28 +161,15 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		//also update the keterangan tidak hadir
-		ctx_keterangan_tidak_hadir, cancle := context.WithTimeout(r.Context(), time.Second*10)
-		defer cancle()
-		if err := h.db.UpdateKeteranganTidakHadirAbsensi(ctx_keterangan_tidak_hadir, absensi.KeteranganTidakHadir); err != nil {
-			//logger the response error for this method
-			logger.Log.Error("Failed to update the keterangan tidak hadir absensi!",
-				zap.String("request_id", request_id),
-				zap.String("client_ip", r.RemoteAddr),
-			)
-			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the keterangan tidak hadir in db!", err.Error())
-			return
-		}
-
 	}
 
 	//validate if the keterangan is izin or dispen
-	if absensi.Keterangan == "izin" || absensi.Keterangan == "dispen" {
+	if absensis.Keterangan == "izin" || absensis.Keterangan == "dispen" {
 
 		//update the status set the status is accepted
 		ctx_status, cancle := context.WithTimeout(r.Context(), time.Second*10)
 		defer cancle()
-		if err := h.db.UpdateStatusAbsensi(ctx_status, "permission"); err != nil {
+		if err := h.db.UpdateStatusAbsensi(absensi.Id, ctx_status, "permission"); err != nil {
 			//logger the response error for this method
 			logger.Log.Error("Failed to update the status!",
 				zap.String("request_id", request_id),
@@ -165,32 +179,6 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		//also update the keterangan tidak hadir
-		ctx_keterangan_tidak_hadir, cancle := context.WithTimeout(r.Context(), time.Second*10)
-		defer cancle()
-		if err := h.db.UpdateKeteranganTidakHadirAbsensi(ctx_keterangan_tidak_hadir, absensi.KeteranganDispen); err != nil {
-			//logger the response error for this method
-			logger.Log.Error("Failed to update the keterangan tidak hadir absensi!",
-				zap.String("request_id", request_id),
-				zap.String("client_ip", r.RemoteAddr),
-			)
-			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the keterangan tidak hadir in db!", err.Error())
-			return
-		}
-
-	}
-
-	//execute the query
-	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
-	defer cancle()
-	if err := h.db.CreateNewAbsensi(ctx, absensi); err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to create the new absensi for students!",
-			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
-		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to create the new absensi for the students!", err.Error())
-		return
 	}
 
 	//parsing time for created and updated
