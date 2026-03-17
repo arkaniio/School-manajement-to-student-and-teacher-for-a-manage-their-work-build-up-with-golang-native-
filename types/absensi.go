@@ -12,6 +12,7 @@ type AbsensiStore interface {
 	UpdateStatusAbsensi(id uuid.UUID, ctx context.Context, status string) error
 	UpdateKeteranganTidakHadirAbsensi(id uuid.UUID, ctx context.Context, keterangan_tidak_hadir string) error
 	GetAbsensiById(id uuid.UUID, ctx context.Context) (*Absensi, error)
+	DeleteAbsensisById(id uuid.UUID, ctx context.Context) error
 }
 
 type Absensi struct {

@@ -202,6 +202,14 @@ func (s *ApiServer) Run() error {
 		)),
 	).Methods("POST")
 
+	//routers for handle delete absensis
+	subRouter.Handle(
+		"/absensi",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			absensiService.DeleteAbsensis_Bp,
+		)),
+	).Methods("DELETE")
+
 	// Create HTTP server
 	s.server = &http.Server{
 		Addr:    s.Addr,

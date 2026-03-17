@@ -12,6 +12,7 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
 
@@ -138,5 +139,82 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 
 	//return final result
 	utils.ResponseSuccess(w, http.StatusCreated, "Create the new data absensi has been successfully!", response_absensi)
+
+}
+
+// add the handler routes for delete the absensis
+func (h *HanlderAbsensi) DeleteAbsensis_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		//make the logger data response for info
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	//get the role from middleware token
+	role_students, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to get the middleware role for this method!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role from middleware!", err.Error())
+		return
+	}
+	if role_students != "siswa" {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method, invalid role!", false)
+		return
+	}
+
+	//get the params id
+	vars_id := mux.Vars(r)
+	if vars_id == nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the params for this method!", false)
+		return
+	}
+	absensi_id := vars_id["absensi_id"]
+	if absensi_id == "" {
+		utils.ResponseError(w, http.StatusBadRequest, "Invalid parameters for this method!", false)
+		return
+	}
+
+	//convert the id from parameters rto type uuid
+	absensi_id_fix, err := uuid.Parse(absensi_id)
+	if err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to parsing the absensi id to type uuid!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to parsing the uuid type!", err.Error())
+		return
+	}
+	if absensi_id_fix == uuid.Nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Invalid value of type uuid!", false)
+		return
+	}
+
+	//execute the query
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.DeleteAbsensisById(absensi_id_fix, ctx); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to delete the absensi data by id!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to delete the data of absensi!", err.Error())
+		return
+	}
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Delete the absensi has been successfully!", true)
 
 }
