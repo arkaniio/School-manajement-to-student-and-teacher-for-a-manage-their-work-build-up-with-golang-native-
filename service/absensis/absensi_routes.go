@@ -146,7 +146,13 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 	}
 
 	//validate if the status is default tidak hadir
-	if absensis.Keterangan == "tidak hadir" {
+	if absensis.Keterangan == "tidak hadir" && absensi.KeteranganTidakHadir != "" {
+
+		//validate if absensi.keterangan tidak hadir is nil value
+		if absensi.KeteranganTidakHadir == "" {
+			utils.ResponseError(w, http.StatusBadRequest, "You must be put the reason why the keterangan is tidak hadir!", false)
+			return
+		}
 
 		//update the status is not accepted
 		ctx_status, cancle := context.WithTimeout(r.Context(), time.Second*10)
@@ -164,7 +170,13 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 	}
 
 	//validate if the keterangan is izin or dispen
-	if absensis.Keterangan == "izin" || absensis.Keterangan == "dispen" {
+	if absensis.Keterangan == "izin" || absensis.Keterangan == "dispen" && absensi.KeteranganDispen != "" {
+
+		//validate if the absensi.KeteranganDispen must be required
+		if absensi.KeteranganDispen == "" {
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to make the keterangan izin, keterangan dispen must be required!", false)
+			return
+		}
 
 		//update the status set the status is accepted
 		ctx_status, cancle := context.WithTimeout(r.Context(), time.Second*10)
