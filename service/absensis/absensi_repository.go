@@ -49,27 +49,32 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Abs
 	//validate if payloads is keterangan hadir
 	if payloads.Keterangan == "hadir" {
 
-		payloads.Status = "hadir"
+		//make the status is hadir
+		payloads.Status = "accepted"
 
 	}
 
 	//validate if payloads is keterangan tidak hadir but keterangan_tidak_hadir is nil
 	if payloads.Keterangan == "tidak hadir" {
 
+		//check if the keterangan tidak hair must be required
 		if payloads.KeteranganTidakHadir == "" {
 			return errors.New("Failed to izin tidak hadir")
 		}
 
+		//make the status is not accepted
 		payloads.Status = "not accepted"
 
 	}
 	//validate if payloads is izin and dispen but keterangan dispen is nill
 	if payloads.Keterangan == "izin" || payloads.Keterangan == "dispen" {
 
+		//validate if the keterangan Dispen must be required
 		if payloads.KeteranganDispen == "" {
 			return errors.New("Failed to izin or dispen!")
 		}
 
+		//make the status is permissions
 		payloads.Status = "permissions"
 
 	}
