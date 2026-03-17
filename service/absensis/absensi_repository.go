@@ -46,6 +46,34 @@ func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Abs
 		RETURNING*;
 	`
 
+	//validate if payloads is keterangan hadir
+	if payloads.Keterangan == "hadir" {
+
+		payloads.Status = "hadir"
+
+	}
+
+	//validate if payloads is keterangan tidak hadir but keterangan_tidak_hadir is nil
+	if payloads.Keterangan == "tidak hadir" {
+
+		if payloads.KeteranganTidakHadir == "" {
+			return errors.New("Failed to izin tidak hadir")
+		}
+
+		payloads.Status = "not accepted"
+
+	}
+	//validate if payloads is izin and dispen but keterangan dispen is nill
+	if payloads.Keterangan == "izin" || payloads.Keterangan == "dispen" {
+
+		if payloads.KeteranganDispen == "" {
+			return errors.New("Failed to izin or dispen!")
+		}
+
+		payloads.Status = "permissions"
+
+	}
+
 	//execute the query
 	if err := tx.QueryRowxContext(
 		ctx,
