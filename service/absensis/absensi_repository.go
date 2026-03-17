@@ -255,3 +255,51 @@ func (s *StoreAbsensi) GetAbsensiById(id uuid.UUID, ctx context.Context) (*types
 	return &absensis, nil
 
 }
+
+// add func to delete the absensis
+func (s *StoreAbsensi) DeleteAbsensisById(id uuid.UUID, ctx context.Context) error {
+
+	//setup the options for a transaction
+	option_tx := &sql.TxOptions{
+		Isolation: sql.LevelSerializable,
+		ReadOnly:  false,
+	}
+
+	//begin the transaction for this method
+	tx, err := s.db.BeginTxx(ctx, option_tx)
+	if err != nil {
+		return errors.New("Failed to setup the transaction for this method!")
+	}
+	defer tx.Rollback()
+
+	//base query for this method
+	query := `
+		DELETE FROM absensis 
+		WHERE id = $1;
+	`
+
+	//execute the query
+	result, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return errors.New("Failed to get the result of transactions!")
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("Failed to get the rows from db, invalid rows!")
+		}
+		return errors.New("Failed to get the rows from db!")
+	}
+	if rows == 0 {
+		return errors.New("Failed to get the rows from db, rows detected is zero!")
+	}
+
+	//commit the transactions
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transactions!")
+	}
+
+	//return final result
+	return nil
+
+}
