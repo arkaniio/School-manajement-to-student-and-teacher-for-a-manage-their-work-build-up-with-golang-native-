@@ -303,3 +303,105 @@ func (s *StoreAbsensi) DeleteAbsensisById(id uuid.UUID, ctx context.Context) err
 	return nil
 
 }
+
+// add the func to update the absensi
+func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payloads types.PayloadAbsensisUpdate) error {
+
+	//setup the options for a transaction
+	option_tx := &sql.TxOptions{
+		Isolation: sql.LevelSerializable,
+		ReadOnly:  false,
+	}
+
+	//begin the transaction for this method
+	tx, err := s.db.BeginTxx(ctx, option_tx)
+	if err != nil {
+		return errors.New("Failed to setup the transaction for this method!")
+	}
+	defer tx.Rollback()
+
+	//setup the variable to put the data
+	var settings []string
+	argsID := 1
+	var args []interface{}
+
+	//if students wants to update their	name_lengkap
+	if payloads.NameLengkap != nil {
+		settings = append(settings, fmt.Sprintf("name_lengkap=$%d", argsID))
+		argsID++
+		args = append(args, *&payloads.NameLengkap)
+	}
+
+	//if students wants to update their jurusan
+	if payloads.Jurusan != nil {
+		settings = append(settings, fmt.Sprintf("jurusan=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.Jurusan)
+	}
+
+	//if students wants to update their hari
+	if payloads.Hari != nil {
+		settings = append(settings, fmt.Sprintf("hari=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.Hari)
+	}
+
+	//if students wants to update their tanggal
+	if payloads.Tanggal != nil {
+		settings = append(settings, fmt.Sprintf("tanggal=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.Tanggal)
+	}
+
+	//if students wants to update their keterangan
+	if payloads.Keterangan != nil {
+
+		settings = append(settings, fmt.Sprintf("keterangan=$%d", argsID))
+		argsID++
+		args = append(args, *payloads.Keterangan)
+
+		//validate if keterangan is hadir
+		if *payloads.Keterangan == "hadir" {
+			settings = append(settings, fmt.Sprintf("status=$%s", "accepted"))
+			args = append(args, *payloads.Status)
+		}
+
+		//validate if keterangan is tidak hadir
+		if *payloads.Keterangan == "tidak hadir" {
+
+			if payloads.KeteranganTidakHadir != nil {
+				settings = append(settings, fmt.Sprintf("keterangan_tidak_hadir=$%d", argsID))
+				argsID++
+				args = append(args, *payloads.KeteranganTidakHadir)
+			} else {
+				return errors.New("If tidak hadir the keterangan tidak hadir must be required")
+			}
+
+			settings = append(settings, fmt.Sprintf("status=$%s", "not accepted"))
+			args = append(args, *payloads.Status)
+
+		}
+
+		//validate if keterangan is izin or dispen
+		if *payloads.Keterangan == "izin" || *payloads.Keterangan == "dispen" {
+
+			if payloads.KeteranganDispen != nil {
+
+			}
+
+			settings = append(settings, fmt.Sprintf("status=$%s", "permissions"))
+			args = append(args, *payloads.Status)
+
+		}
+
+	}
+
+	//commit the transaction
+	if err := tx.Commit(); err != nil {
+		return errors.New("Failed to commit the transaction")
+	}
+
+	//return final result
+	return nil
+
+}

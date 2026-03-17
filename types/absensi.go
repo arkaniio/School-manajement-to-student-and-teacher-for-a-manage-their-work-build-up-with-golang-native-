@@ -62,3 +62,19 @@ type AbsensiResponse struct {
 	KeteranganDispen     string    `json:"keterangan_dispen"`
 	FileDispen           string    `json:"file_dispen"`
 }
+
+type PayloadAbsensisUpdate struct {
+	Id                   uuid.UUID `json:"id"`
+	NameLengkap          *string   `json:"name_lengkap" validate:"required"`
+	Kelas                *string   `json:"kelas" validate:"required"`
+	Jurusan              *string   `json:"jurusan" validate:"required"`
+	Hari                 *string   `json:"hari" validate:"required"`
+	Tanggal              *string   `json:"tanggal" validate:"required"`
+	Status               *string   `json:"status"`
+	Keterangan           *string   `json:"keterangan" validate:"required"`
+	Created_at           time.Time `json:"created_at"`
+	Updated_at           time.Time `json:"updated_at"`
+	KeteranganTidakHadir *string   `json:"keterangan_tidak_hadir"`
+	KeteranganDispen     *string   `json:"keterangan_dispen"`
+	FileDispen           *string   `json:"file_dispen"`
+}
