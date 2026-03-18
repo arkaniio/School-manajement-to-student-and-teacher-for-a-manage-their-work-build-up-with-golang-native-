@@ -9,6 +9,7 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/service/absensis"
 	serviceStudent "github.com/ArkaniLoveCoding/Shcool-manajement/service/students"
+	studentsgrades "github.com/ArkaniLoveCoding/Shcool-manajement/service/students_grades"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/service/tasks"
 	serviceUser "github.com/ArkaniLoveCoding/Shcool-manajement/service/users"
 	"github.com/gorilla/mux"
@@ -217,6 +218,18 @@ func (s *ApiServer) Run() error {
 			absensiService.UpdateAbsensi_Bp,
 		)),
 	).Methods("PATCH")
+
+	//students grade service and handler
+	students_grades_store := studentsgrades.NewHandlerStoreStudentsGrade(s.db)
+	students_grades_service := studentsgrades.NewHandlerStudentsGrade(students_grades_store)
+
+	//router for handler create a new task grade for students
+	subRouter.Handle(
+		"/grades",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			students_grades_service.CreateNewStudentsGrade_Bp,
+		)),
+	).Methods("POST")
 
 	// Create HTTP server
 	s.server = &http.Server{

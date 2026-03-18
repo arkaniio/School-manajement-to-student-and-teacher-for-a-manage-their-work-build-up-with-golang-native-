@@ -26,7 +26,6 @@ func NewHandlerStoreAbsensi(db *sqlx.DB) *StoreAbsensi {
 // func to make the new absensi
 func (s *StoreAbsensi) CreateNewAbsensi(ctx context.Context, payloads *types.Absensi) error {
 
-	//make the transactions method
 	//setup the options for a transaction
 	option_tx := &sql.TxOptions{
 		Isolation: sql.LevelSerializable,

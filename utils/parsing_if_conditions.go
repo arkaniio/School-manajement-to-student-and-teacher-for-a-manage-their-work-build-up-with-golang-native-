@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"strconv"
+	"time"
 )
 
 func SetIsNotEmpty(dest **string, val string) {
@@ -24,5 +25,12 @@ func SetIsNotEmptyAbsen(dest **int, val string) error {
 	}
 
 	return nil
+
+}
+
+func SetResponseTime(format string) string {
+
+	format_created_at_and_updated_at := time.Now().UTC().Format(format)
+	return format_created_at_and_updated_at
 
 }
