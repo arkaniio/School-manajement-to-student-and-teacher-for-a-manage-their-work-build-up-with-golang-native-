@@ -6,6 +6,6 @@ CREATE TABLE tasks (
     date_task   TIMESTAMP NOT NULL,
     student_id  UUID NOT NULL REFERENCES students(id),
     created_at  TIMESTAMP NOT NULL,
-    updated_at  TIMESTAMP NOT NULL
-    mapel_task  VARCHAR(255) NOT NULL,
+    updated_at  TIMESTAMP NOT NULL,
+    mapel_task  VARCHAR(255) NOT NULL
 );
