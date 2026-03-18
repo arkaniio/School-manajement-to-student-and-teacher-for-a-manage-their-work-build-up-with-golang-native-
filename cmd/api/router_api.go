@@ -210,6 +210,14 @@ func (s *ApiServer) Run() error {
 		)),
 	).Methods("DELETE")
 
+	//router for handle update absensis
+	subRouter.Handle(
+		"/absensi/{absensi_id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			absensiService.UpdateAbsensi_Bp,
+		)),
+	).Methods("PATCH")
+
 	// Create HTTP server
 	s.server = &http.Server{
 		Addr:    s.Addr,
