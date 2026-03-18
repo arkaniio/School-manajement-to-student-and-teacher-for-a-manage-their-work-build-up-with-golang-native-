@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
@@ -426,41 +425,25 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 		}
 
 		//if the payload in students profile is not nill
-		payloads.StudentProfile = &path_file
+		utils.SetIsNotEmpty(&payloads.StudentProfile, file_name_student)
 
 	}
 
 	//checking and validate again
-	if mapel_students != "" {
-		payloads.MapelStudents = &mapel_students
+	utils.SetIsNotEmpty(&payloads.Full_name, full_name)
+	utils.SetIsNotEmpty(&payloads.Jurusan, jurusan)
+	utils.SetIsNotEmpty(&payloads.Kelas, kelas)
+	utils.SetIsNotEmpty(&payloads.Wali_Kelas, wali_kelas)
+	if err := utils.SetIsNotEmptyAbsen(&payloads.Absen, absen); err != nil {
+		//logger the response error for this methodd
+		logger.Log.Error("Failed to settings the parsing into payloads!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to settings the absen into an integer!", err.Error())
+		return
 	}
-	if full_name != "" {
-		payloads.Full_name = &full_name
-	}
-	if kelas != "" {
-		payloads.Kelas = &kelas
-	}
-	if jurusan != "" {
-		payloads.Jurusan = &jurusan
-	}
-	if absen != "" {
-		//convert the value of absen into an integer
-		absen_fix, err := strconv.Atoi(absen)
-		if err != nil {
-			//logger the response error for this method
-			logger.Log.Error("Failed to convert from string into an integer for a absen!",
-				zap.String("request_id", request_id),
-				zap.String("client_ip", r.RemoteAddr),
-			)
-			utils.ResponseError(w, http.StatusBadRequest, "Failed to convert type strings into an integer for a absen!", err.Error())
-			return
-		}
-		payloads.Absen = &absen_fix
-
-	}
-	if wali_kelas != "" {
-		payloads.Wali_Kelas = &wali_kelas
-	}
+	utils.SetIsNotEmpty(&payloads.MapelStudents, mapel_students)
 
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)

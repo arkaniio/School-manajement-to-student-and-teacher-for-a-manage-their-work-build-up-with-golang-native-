@@ -606,19 +606,15 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 			}
 
 			//parsing into a payload
-			payloads.File_Task = &path_file
+			utils.SetIsNotEmpty(&payloads.File_Task, path_file)
 
 		}
 
 	}
 
 	//condition that macth with store
-	if name_task != "" {
-		payloads.Name_Task = &name_task
-	}
-	if mapel_task != "" {
-		payloads.MapelTask = &mapel_task
-	}
+	utils.SetIsNotEmpty(&payloads.Name_Task, name_task)
+	utils.SetIsNotEmpty(&payloads.MapelTask, mapel_task)
 
 	//execute the methods from store
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)

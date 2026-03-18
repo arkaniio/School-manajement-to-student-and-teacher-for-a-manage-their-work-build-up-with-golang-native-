@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
 	"github.com/google/uuid"
@@ -329,7 +330,7 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 	if payloads.NameLengkap != nil {
 		settings = append(settings, fmt.Sprintf("name_lengkap=$%d", argsID))
 		argsID++
-		args = append(args, *&payloads.NameLengkap)
+		args = append(args, *payloads.NameLengkap)
 	}
 
 	//if students wants to update their jurusan
@@ -386,7 +387,11 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 		if *payloads.Keterangan == "izin" || *payloads.Keterangan == "dispen" {
 
 			if payloads.KeteranganDispen != nil {
-
+				settings = append(settings, fmt.Sprintf("keterangan_dispen=%d", argsID))
+				argsID++
+				args = append(args, *payloads.KeteranganDispen)
+			} else {
+				return errors.New("Failed to change the keterangan dispen!")
 			}
 
 			settings = append(settings, fmt.Sprintf("status=$%s", "permissions"))
@@ -394,6 +399,30 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 
 		}
 
+	}
+
+	//update the updated at in table db
+	settings = append(settings, fmt.Sprintf("updated_at=$%d", argsID))
+	argsID++
+	args = append(args, time.Now().UTC())
+
+	//execute the full query for this method
+	full_query := fmt.Sprintf("UPDATE absensis SET %s WHERE id = %d", strings.Join(settings, ","), argsID)
+	args = append(args, id)
+
+	result, err := tx.ExecContext(ctx, full_query, args...)
+	if err != nil {
+		return errors.New("Failed to execute the query for this method!")
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("Failed to detect the rows in db!")
+		}
+		return errors.New("Failed to check the length of every rows in db!")
+	}
+	if rows == 0 {
+		return errors.New("Failed to get the rows from db!")
 	}
 
 	//commit the transaction

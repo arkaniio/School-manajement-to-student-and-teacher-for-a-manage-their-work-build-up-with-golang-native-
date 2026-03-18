@@ -503,21 +503,17 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		payload.Profile_Image = &path_final
+
+		utils.SetIsNotEmpty(&payload.Profile_Image, path_final)
+
 	}
 
 	// validate if the username, email or password and profile image is nil, it will be return a nil not a string
 	// so we can validate it use the conditional validation to make sure that if the email, username or password
 	// is not a nill value, it will be passed into a payload data
-	if username != "" {
-		payload.Username = &username
-	}
-	if email != "" {
-		payload.Email = &email
-	}
-	if password != "" {
-		payload.Password = &password
-	}
+	utils.SetIsNotEmpty(&payload.Username, username)
+	utils.SetIsNotEmpty(&payload.Email, email)
+	utils.SetIsNotEmpty(&payload.Password, password)
 
 	//settings the context and setup the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)

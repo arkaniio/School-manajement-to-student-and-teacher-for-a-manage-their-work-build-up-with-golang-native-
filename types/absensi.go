@@ -13,6 +13,7 @@ type AbsensiStore interface {
 	UpdateKeteranganTidakHadirAbsensi(id uuid.UUID, ctx context.Context, keterangan_tidak_hadir string) error
 	GetAbsensiById(id uuid.UUID, ctx context.Context) (*Absensi, error)
 	DeleteAbsensisById(id uuid.UUID, ctx context.Context) error
+	UpdateAbsensiById(id uuid.UUID, ctx context.Context, payloads PayloadAbsensisUpdate) error
 }
 
 type Absensi struct {
