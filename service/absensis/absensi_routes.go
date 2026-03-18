@@ -429,32 +429,33 @@ func (h *HanlderAbsensi) UpdateAbsensi_Bp(w http.ResponseWriter, r *http.Request
 			utils.SetIsNotEmpty(&payloads.FileDispen, file_name_final)
 
 		}
-
-		//check the conditions
-		utils.SetIsNotEmpty(&payloads.NameLengkap, name_lengkap)
-		utils.SetIsNotEmpty(&payloads.Kelas, kelas)
-		utils.SetIsNotEmpty(&payloads.Jurusan, jurusan)
-		utils.SetIsNotEmpty(&payloads.Hari, hari)
-		utils.SetIsNotEmpty(&payloads.Tanggal, tanggal)
-		utils.SetIsNotEmpty(&payloads.Status, status)
-		utils.SetIsNotEmpty(&payloads.Keterangan, keterangan)
-		utils.SetIsNotEmpty(&payloads.KeteranganTidakHadir, keterangan_tidak_hadir)
-		utils.SetIsNotEmpty(&payloads.KeteranganDispen, keterangan_dispen)
-
-		//execute the query from repository for this method
-		if err := h.db.UpdateAbsensiById(absensi_id_fix, ctx, payloads); err != nil {
-			//logger the response error for this method
-			logger.Log.Error("Failed to update the absensi by id!",
-				zap.String("request_id", request_id),
-				zap.String("client_ip", r.RemoteAddr),
-			)
-			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the absensi data by id!", err.Error())
-			return
-		}
-
-		//return final result
-		utils.ResponseSuccess(w, http.StatusOK, "Update the absensi data by id has been successfully!", true)
-
 	}
+
+	//check the conditions
+	utils.SetIsNotEmpty(&payloads.NameLengkap, name_lengkap)
+	utils.SetIsNotEmpty(&payloads.Kelas, kelas)
+	utils.SetIsNotEmpty(&payloads.Jurusan, jurusan)
+	utils.SetIsNotEmpty(&payloads.Hari, hari)
+	utils.SetIsNotEmpty(&payloads.Tanggal, tanggal)
+	utils.SetIsNotEmpty(&payloads.Status, status)
+	utils.SetIsNotEmpty(&payloads.Keterangan, keterangan)
+	utils.SetIsNotEmpty(&payloads.KeteranganTidakHadir, keterangan_tidak_hadir)
+	utils.SetIsNotEmpty(&payloads.KeteranganDispen, keterangan_dispen)
+
+	//execute the query from repository for this method
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	if err := h.db.UpdateAbsensiById(absensi_id_fix, ctx, payloads); err != nil {
+		//logger the response error for this method
+		logger.Log.Error("Failed to update the absensi by id!",
+			zap.String("request_id", request_id),
+			zap.String("client_ip", r.RemoteAddr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to update the absensi data by id!", err.Error())
+		return
+	}
+
+	//return final result
+	utils.ResponseSuccess(w, http.StatusOK, "Update the absensi data by id has been successfully!", true)
 
 }

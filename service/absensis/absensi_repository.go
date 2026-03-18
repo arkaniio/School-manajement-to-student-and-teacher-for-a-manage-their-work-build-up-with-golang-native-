@@ -363,8 +363,9 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 
 		//validate if keterangan is hadir
 		if *payloads.Keterangan == "hadir" {
-			settings = append(settings, fmt.Sprintf("status=$%s", "accepted"))
-			args = append(args, *payloads.Status)
+			settings = append(settings, fmt.Sprintf("status=%d", argsID))
+			argsID++
+			args = append(args, "accepted")
 		}
 
 		//validate if keterangan is tidak hadir
@@ -378,8 +379,9 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 				return errors.New("If tidak hadir the keterangan tidak hadir must be required")
 			}
 
-			settings = append(settings, fmt.Sprintf("status=$%s", "not accepted"))
-			args = append(args, *payloads.Status)
+			settings = append(settings, fmt.Sprintf("status=$%d", argsID))
+			argsID++
+			args = append(args, "not accepted")
 
 		}
 
@@ -394,8 +396,9 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 				return errors.New("Failed to change the keterangan dispen!")
 			}
 
-			settings = append(settings, fmt.Sprintf("status=$%s", "permissions"))
-			args = append(args, *payloads.Status)
+			settings = append(settings, fmt.Sprintf("status=$%d", argsID))
+			argsID++
+			args = append(args, "not accepted")
 
 		}
 
@@ -407,12 +410,12 @@ func (s *StoreAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payl
 	args = append(args, time.Now().UTC())
 
 	//execute the full query for this method
-	full_query := fmt.Sprintf("UPDATE absensis SET %s WHERE id = %d", strings.Join(settings, ","), argsID)
+	full_query := fmt.Sprintf("UPDATE absensis SET %s WHERE id = $%d", strings.Join(settings, ","), argsID)
 	args = append(args, id)
 
 	result, err := tx.ExecContext(ctx, full_query, args...)
 	if err != nil {
-		return errors.New("Failed to execute the query for this method!")
+		return errors.New("Failed to execute the query for this method!" + err.Error())
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
