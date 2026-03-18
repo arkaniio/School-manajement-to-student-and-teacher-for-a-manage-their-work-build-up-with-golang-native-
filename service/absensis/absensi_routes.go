@@ -441,6 +441,20 @@ func (h *HanlderAbsensi) UpdateAbsensi_Bp(w http.ResponseWriter, r *http.Request
 		utils.SetIsNotEmpty(&payloads.KeteranganTidakHadir, keterangan_tidak_hadir)
 		utils.SetIsNotEmpty(&payloads.KeteranganDispen, keterangan_dispen)
 
+		//execute the query from repository for this method
+		if err := h.db.UpdateAbsensiById(absensi_id_fix, ctx, payloads); err != nil {
+			//logger the response error for this method
+			logger.Log.Error("Failed to update the absensi by id!",
+				zap.String("request_id", request_id),
+				zap.String("client_ip", r.RemoteAddr),
+			)
+			utils.ResponseError(w, http.StatusBadRequest, "Failed to update the absensi data by id!", err.Error())
+			return
+		}
+
+		//return final result
+		utils.ResponseSuccess(w, http.StatusOK, "Update the absensi data by id has been successfully!", true)
+
 	}
 
 }
