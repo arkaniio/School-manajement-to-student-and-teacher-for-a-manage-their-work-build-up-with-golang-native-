@@ -301,7 +301,125 @@ func (s *StoreAbsensi) DeleteAbsensisById(id uuid.UUID, ctx context.Context) err
 
 	//return final result
 	return nil
+}
 
+// New repository methods for statistics
+
+// GetWeeklyStats returns attendance stats for last 7 days
+func (s *StoreAbsensi) GetWeeklyStats(ctx context.Context) (*types.AbsensiStats, error) {
+	query := `
+		SELECT 
+			CASE 
+				WHEN status = 'accepted' THEN 'hadir'
+				WHEN status = 'not accepted' THEN 'tidak_hadir' 
+				WHEN status = 'permissions' THEN 'izin'
+				ELSE 'other'
+			END as status_type,
+			COUNT(*) as count
+		FROM absensis 
+		WHERE CAST(tanggal AS DATE) >= CURRENT_DATE - INTERVAL '7 days'
+		GROUP BY 
+			CASE 
+				WHEN status = 'accepted' THEN 'hadir'
+				WHEN status = 'not accepted' THEN 'tidak_hadir'
+				WHEN status = 'permissions' THEN 'izin'
+				ELSE 'other'
+			END
+	`
+
+	type rawStat struct {
+		StatusType string `db:"status_type"`
+		Count      int    `db:"count"`
+	}
+
+	var stats []rawStat
+	if err := s.db.SelectContext(ctx, &stats, query); err != nil {
+		return nil, errors.New("Failed to get weekly stats: " + err.Error())
+	}
+
+	result := &types.AbsensiStats{}
+	for _, stat := range stats {
+		switch stat.StatusType {
+		case "hadir":
+			result.Hadir = stat.Count
+		case "tidak_hadir":
+			result.TidakHadir = stat.Count
+		case "izin":
+			result.Izin = stat.Count
+		}
+	}
+
+	return result, nil
+}
+
+// GetMonthlyStats returns attendance stats for last 30 days
+func (s *StoreAbsensi) GetMonthlyStats(ctx context.Context) (*types.AbsensiStats, error) {
+	query := `
+		SELECT 
+			CASE 
+				WHEN status = 'accepted' THEN 'hadir'
+				WHEN status = 'not accepted' THEN 'tidak_hadir' 
+				WHEN status = 'permissions' THEN 'izin'
+				ELSE 'other'
+			END as status_type,
+			COUNT(*) as count
+		FROM absensis 
+		WHERE CAST(tanggal AS DATE) >= CURRENT_DATE - INTERVAL '30 days'
+		GROUP BY 
+			CASE 
+				WHEN status = 'accepted' THEN 'hadir'
+				WHEN status = 'not accepted' THEN 'tidak_hadir'
+				WHEN status = 'permissions' THEN 'izin'
+				ELSE 'other'
+			END
+	`
+
+	type rawStat struct {
+		StatusType string `db:"status_type"`
+		Count      int    `db:"count"`
+	}
+
+	var stats []rawStat
+	if err := s.db.SelectContext(ctx, &stats, query); err != nil {
+		return nil, errors.New("Failed to get monthly stats: " + err.Error())
+	}
+
+	result := &types.AbsensiStats{}
+	for _, stat := range stats {
+		switch stat.StatusType {
+		case "hadir":
+			result.Hadir = stat.Count
+		case "tidak_hadir":
+			result.TidakHadir = stat.Count
+		case "izin":
+			result.Izin = stat.Count
+		}
+	}
+
+	return result, nil
+}
+
+// GetAllAbsensiWithStudents returns all attendance records joined with student info
+func (s *StoreAbsensi) GetAllAbsensiWithStudents(ctx context.Context) ([]types.AbsensiWithStudent, error) {
+	query := `
+		SELECT 
+			a.id, a.name_lengkap, a.kelas, a.jurusan, a.hari, a.tanggal, a.status, 
+			a.keterangan, a.created_at, a.updated_at, a.keterangan_tidak_hadir, 
+			a.keterangan_dispen, a.file_dispen,
+			s.full_name, s.kelas as s_kelas, s.jurusan as s_jurusan, 
+			s.absen as s_absen, s.student_profile, s.wali_kelas as s_wali_kelas, 
+			s.mapel_students as s_mapel_students
+		FROM absensis a 
+		LEFT JOIN students s ON a.student_id = s.id 
+		ORDER BY a.tanggal DESC, a.created_at DESC
+	`
+
+	var absensiList []types.AbsensiWithStudent
+	if err := s.db.SelectContext(ctx, &absensiList, query); err != nil {
+		return nil, errors.New("Failed to get absensi with students: " + err.Error())
+	}
+
+	return absensiList, nil
 }
 
 // add the func to update the absensi

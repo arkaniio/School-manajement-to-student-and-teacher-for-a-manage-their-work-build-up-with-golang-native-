@@ -2,7 +2,6 @@ package absensis
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -12,8 +11,10 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware/logger"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
+	"github.com/jmoiron/sqlx"
+
 	"github.com/ArkaniLoveCoding/Shcool-manajement/utils"
-	"github.com/go-playground/validator/v10"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -21,21 +22,24 @@ import (
 
 // make the handler type for a absensi
 type HanlderAbsensi struct {
-	db types.AbsensiStore
+	db      types.AbsensiStore
+	service *ServiceAbsensi
 }
 
 // make the func to get handler absensis
-func NewHandlerAbsensi(db types.AbsensiStore) *HanlderAbsensi {
-	return &HanlderAbsensi{db: db}
+func NewHandlerAbsensi(db *sqlx.DB) *HanlderAbsensi {
+	repo := NewHandlerStoreAbsensi(db)
+	service := NewServiceAbsensi(repo)
+	return &HanlderAbsensi{
+		db:      repo,
+		service: service,
+	}
 }
 
 // func to create the absensi
-func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Request) {
-
-	//get request from middleware
+func (h *HanlderAbsensi) GetWeeklyStats_Bp(w http.ResponseWriter, r *http.Request) {
 	request_id := middleware.GetRequestID(r)
 	if request_id == "" {
-		//make the logger data response for info
 		logger.Log.Info("Failed to get the request id from this func!",
 			zap.String("client_ip", r.RemoteAddr),
 			zap.String("path", r.URL.Path),
@@ -44,105 +48,116 @@ func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	//get the role from middleware and validate the role
-	role_students, err := middleware.GetRoleMiddleware(w, r)
+	role, err := middleware.GetRoleMiddleware(w, r)
 	if err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to get the role students from middleware token!",
+		logger.Log.Error("Failed to get role from middleware!",
 			zap.String("request_id", request_id),
 			zap.String("client_ip", r.RemoteAddr),
 		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to get the role students from middleware!", err.Error())
+		utils.ResponseError(w, http.StatusUnauthorized, "Failed to get role!", err.Error())
 		return
 	}
-	if role_students != "siswa" {
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to access this method, invalid role!", false)
+	if role != "siswa" {
+		utils.ResponseError(w, http.StatusForbidden, "Access denied, invalid role!", false)
 		return
 	}
 
-	//decode the payloads from type tasks
-	var payloads types.PayloadAbsensis
-	if err := utils.DecodeData(r, &payloads); err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to decod the payloads of the data",
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
+
+	stats, err := h.service.GetWeeklyStats(ctx)
+	if err != nil {
+		logger.Log.Error("Failed to get weekly stats!",
+			zap.String("request_id", request_id),
+			zap.Error(err),
+		)
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed to get weekly attendance stats!", err.Error())
+		return
+	}
+
+	utils.ResponseSuccess(w, http.StatusOK, "Weekly attendance stats retrieved successfully!", stats)
+}
+
+func (h *HanlderAbsensi) GetMonthlyStats_Bp(w http.ResponseWriter, r *http.Request) {
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		logger.Log.Error("Failed to get role from middleware!",
 			zap.String("request_id", request_id),
 			zap.String("client_ip", r.RemoteAddr),
 		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to decode the payloads!", err.Error())
+		utils.ResponseError(w, http.StatusUnauthorized, "Failed to get role!", err.Error())
+		return
+	}
+	if role != "siswa" {
+		utils.ResponseError(w, http.StatusForbidden, "Access denied, invalid role!", false)
 		return
 	}
 
-	//make the validator for this method
-	var validate *validator.Validate
-	validate = validator.New()
-	if err := validate.Struct(&payloads); err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to check the validator for this method!",
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
+
+	stats, err := h.service.GetMonthlyStats(ctx)
+	if err != nil {
+		logger.Log.Error("Failed to get monthly stats!",
+			zap.String("request_id", request_id),
+			zap.Error(err),
+		)
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed to get monthly attendance stats!", err.Error())
+		return
+	}
+
+	utils.ResponseSuccess(w, http.StatusOK, "Monthly attendance stats retrieved successfully!", stats)
+}
+
+func (h *HanlderAbsensi) GetAllAbsensiWithStudents_Bp(w http.ResponseWriter, r *http.Request) {
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		logger.Log.Error("Failed to get role from middleware!",
 			zap.String("request_id", request_id),
 			zap.String("client_ip", r.RemoteAddr),
 		)
-		var errors []string
-		for _, Err := range err.(validator.ValidationErrors) {
-			errors = append(errors, fmt.Sprintf("Error Detected: %s, %s", Err.ActualTag(), Err.Field()))
-		}
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to validate the payloads!", err.Error())
+		utils.ResponseError(w, http.StatusUnauthorized, "Failed to get role!", err.Error())
+		return
+	}
+	if role != "siswa" {
+		utils.ResponseError(w, http.StatusForbidden, "Access denied, invalid role!", false)
 		return
 	}
 
-	//parsing into struct absensi
-	absensi := &types.Absensi{
-		Id:                   uuid.New(),
-		NameLengkap:          payloads.NameLengkap,
-		Kelas:                payloads.Kelas,
-		Jurusan:              payloads.Jurusan,
-		Hari:                 payloads.Hari,
-		Tanggal:              payloads.Tanggal,
-		Status:               payloads.Status,
-		Keterangan:           payloads.Keterangan,
-		Created_at:           payloads.Created_at,
-		Updated_at:           payloads.Updated_at,
-		KeteranganTidakHadir: payloads.KeteranganTidakHadir,
-		KeteranganDispen:     payloads.KeteranganDispen,
-		FileDispen:           payloads.FileDispen,
-	}
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
 
-	//execute the query
-	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
-	defer cancle()
-	if err := h.db.CreateNewAbsensi(ctx, absensi); err != nil {
-		//logger the response error for this method
-		logger.Log.Error("Failed to create the new absensi for students!",
+	absensiList, err := h.service.GetAllAbsensiWithStudents(ctx)
+	if err != nil {
+		logger.Log.Error("Failed to get absensi with students!",
 			zap.String("request_id", request_id),
-			zap.String("client_ip", r.RemoteAddr),
+			zap.Error(err),
 		)
-		utils.ResponseError(w, http.StatusBadRequest, "Failed to create the new absensi for the students!", err.Error())
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed to get absensi with students!", err.Error())
 		return
 	}
 
-	//parsing time for created and updated
-	time_created := time.Now().UTC().Format("2006-01-02")
-	time_updated := time.Now().UTC().Format("2006-01-02")
-
-	//make the response for this method
-	response_absensi := types.AbsensiResponse{
-		Id:                   absensi.Id,
-		NameLengkap:          absensi.NameLengkap,
-		Kelas:                absensi.Kelas,
-		Jurusan:              absensi.Jurusan,
-		Hari:                 absensi.Hari,
-		Tanggal:              absensi.Tanggal,
-		Status:               absensi.Status,
-		Keterangan:           absensi.Keterangan,
-		Created_at:           time_created,
-		Updated_at:           time_updated,
-		KeteranganTidakHadir: absensi.KeteranganTidakHadir,
-		KeteranganDispen:     absensi.KeteranganDispen,
-		FileDispen:           absensi.FileDispen,
-	}
-
-	//return final result
-	utils.ResponseSuccess(w, http.StatusCreated, "Create the new data absensi has been successfully!", response_absensi)
-
+	utils.ResponseSuccess(w, http.StatusOK, "Absensi with students retrieved successfully!", absensiList)
 }
 
 // add the handler routes for delete the absensis
@@ -458,4 +473,46 @@ func (h *HanlderAbsensi) UpdateAbsensi_Bp(w http.ResponseWriter, r *http.Request
 	//return final result
 	utils.ResponseSuccess(w, http.StatusOK, "Update the absensi data by id has been successfully!", true)
 
+}
+
+// GetWeeklyStats handler - attendance statistics for last 7 days
+func (h *HanlderAbsensi) CreateNewAbsensi_Bp(w http.ResponseWriter, r *http.Request) {
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		logger.Log.Info("Failed to get the request id from this func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id for this method!", false)
+		return
+	}
+
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		logger.Log.Error("Auth middleware error",
+			zap.Error(err),
+			zap.String("request_id", request_id))
+		utils.ResponseError(w, http.StatusUnauthorized, "Unauthorized", err.Error())
+		return
+	}
+	if role != "siswa" {
+		logger.Log.Warn("Access denied invalid role",
+			zap.String("role", role))
+		utils.ResponseError(w, http.StatusForbidden, "Forbidden", nil)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	stats, err := h.service.GetWeeklyStats(ctx)
+	if err != nil {
+		logger.Log.Error("Failed to get weekly stats",
+			zap.Error(err),
+			zap.String("request_id", request_id))
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed to retrieve weekly stats", err.Error())
+		return
+	}
+
+	utils.ResponseSuccess(w, http.StatusOK, "Weekly stats success", stats)
 }

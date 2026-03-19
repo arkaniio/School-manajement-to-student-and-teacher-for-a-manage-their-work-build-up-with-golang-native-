@@ -12,5 +12,6 @@ CREATE TABLE absensis (
     updated_at              TIMESTAMP NOT NULL,
     keterangan_tidak_hadir  VARCHAR(255),
     keterangan_dispen       VARCHAR(255),
-    file_dispen             VARCHAR(255)
+    file_dispen             VARCHAR(255),
+    student_id              UUID NOT NULL REFERENCES students(id)
 );

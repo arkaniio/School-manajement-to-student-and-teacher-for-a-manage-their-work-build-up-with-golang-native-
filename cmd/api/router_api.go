@@ -191,17 +191,38 @@ func (s *ApiServer) Run() error {
 		),
 	).Methods("GET")
 
-	//absensi service
-	absensiStore := absensis.NewHandlerStoreAbsensi(s.db)
-	absensiService := absensis.NewHandlerAbsensi(absensiStore)
+	//absensi service - updated to use NewHandlerAbsensi(db)
+	absensiService := absensis.NewHandlerAbsensi(s.db)
 
-	//routes for handle create new absensis
+	//routes for handle create new absensi
 	subRouter.Handle(
 		"/absensi",
 		middleware.TokenIdMiddleware(http.HandlerFunc(
 			absensiService.CreateNewAbsensi_Bp,
 		)),
 	).Methods("POST")
+
+	// NEW stats routes
+	subRouter.Handle(
+		"/absensi/stats/weekly",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			absensiService.GetWeeklyStats_Bp,
+		)),
+	).Methods("GET")
+
+	subRouter.Handle(
+		"/absensi/stats/monthly",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			absensiService.GetMonthlyStats_Bp,
+		)),
+	).Methods("GET")
+
+	subRouter.Handle(
+		"/absensi/all-with-students",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			absensiService.GetAllAbsensiWithStudents_Bp,
+		)),
+	).Methods("GET")
 
 	//routers for handle delete absensis
 	subRouter.Handle(
