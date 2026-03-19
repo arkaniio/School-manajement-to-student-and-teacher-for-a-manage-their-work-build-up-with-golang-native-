@@ -8,7 +8,7 @@ import (
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/service/absensis"
-	serviceStudent "github.com/ArkaniLoveCoding/Shcool-manajement/service/students"
+	"github.com/ArkaniLoveCoding/Shcool-manajement/service/students"
 	studentsgrades "github.com/ArkaniLoveCoding/Shcool-manajement/service/students_grades"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/service/tasks"
 	serviceUser "github.com/ArkaniLoveCoding/Shcool-manajement/service/users"
@@ -96,8 +96,7 @@ func (s *ApiServer) Run() error {
 	).Methods("GET")
 
 	//router for the student routes
-	studentStore := serviceStudent.NewStudentStore(s.db)
-	studentService := serviceStudent.NewHandlerStudent(studentStore)
+	studentService := students.NewHandlerStudent(s.db)
 
 	//router for register as a student
 	subRouter.Handle(

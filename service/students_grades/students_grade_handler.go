@@ -13,17 +13,24 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
 // make the handler type for a student_grades
 type HanlderStudentsGrade struct {
-	db types.StudentsGradeStore
+	repo    types.StudentsGradeStore
+	service *ServiceStudentGrade
 }
 
 // make the func to get handler absensis
-func NewHandlerStudentsGrade(db types.StudentsGradeStore) *HanlderStudentsGrade {
-	return &HanlderStudentsGrade{db: db}
+func NewHandlerStudentsGrade(db *sqlx.DB) *HanlderStudentsGrade {
+	repo := NewHandlerStoreStudentsGrade(db)
+	service := NewServiceStudentsGrade(repo)
+	return &HanlderStudentsGrade{
+		repo:    repo,
+		service: service,
+	}
 }
 
 // add func to create a new students greade for every students
@@ -100,7 +107,7 @@ func (h *HanlderStudentsGrade) CreateNewStudentsGrade_Bp(w http.ResponseWriter, 
 	//execute the method from repository
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.CreateNewStudentsGrade(ctx, students_grades); err != nil {
+	if err := h.repo.CreateNewStudentsGrade(ctx, students_grades); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to create new task grade!",
 			zap.String("request_id", request_id),
@@ -187,7 +194,7 @@ func (h *HanlderStudentsGrade) UpdateStudentsGrade_Bp(w http.ResponseWriter, r *
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancel()
-	if err := h.db.UpdateStudentsGrade(ctx, id, &payloads); err != nil {
+	if err := h.repo.UpdateStudentsGrade(ctx, id, &payloads); err != nil {
 		logger.Log.Error("Failed to update students grade!",
 			zap.String("request_id", request_id),
 			zap.String("id", id.String()),
@@ -245,7 +252,7 @@ func (h *HanlderStudentsGrade) DeleteStudentsGrade_Bp(w http.ResponseWriter, r *
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancel()
 
-	if err := h.db.DeleteStudentsGrade(ctx, id); err != nil {
+	if err := h.repo.DeleteStudentsGrade(ctx, id); err != nil {
 		logger.Log.Error("Failed to delete grade!",
 			zap.String("request_id", request_id),
 			zap.String("id", idStr),
@@ -287,7 +294,7 @@ func (h *HanlderStudentsGrade) GetAllStudentsGradesWithTask_Bp(w http.ResponseWr
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancel()
 
-	grades, err := h.db.GetAllStudentsGradesWithTask(ctx)
+	grades, err := h.repo.GetAllStudentsGradesWithTask(ctx)
 	if err != nil {
 		logger.Log.Error("Failed to get all grades!",
 			zap.String("request_id", request_id),

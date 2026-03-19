@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
+	"github.com/google/uuid"
 )
 
 type ServiceAbsensi struct {
@@ -26,4 +27,12 @@ func (s *ServiceAbsensi) GetMonthlyStats(ctx context.Context) (*types.AbsensiSta
 
 func (s *ServiceAbsensi) GetAllAbsensiWithStudents(ctx context.Context) ([]types.AbsensiWithStudent, error) {
 	return s.repo.GetAllAbsensiWithStudents(ctx)
+}
+
+func (s *ServiceAbsensi) UpdateAbsensiById(id uuid.UUID, ctx context.Context, payloads types.PayloadAbsensisUpdate) error {
+	return s.repo.UpdateAbsensiById(id, ctx, payloads)
+}
+
+func (s *ServiceAbsensi) DeleteAbsensisById(id uuid.UUID, ctx context.Context) error {
+	return s.repo.DeleteAbsensisById(id, ctx)
 }

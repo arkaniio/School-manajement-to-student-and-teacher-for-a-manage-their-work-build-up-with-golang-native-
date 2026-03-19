@@ -16,17 +16,24 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
 // type handlerequest that declare the student store for a database logic
 type HandleStudentsRequest struct {
-	db types.StudentStore
+	repo    types.StudentStore
+	service *ServiceStudens
 }
 
 // func that declare the handler for student
-func NewHandlerStudent(db types.StudentStore) *HandleStudentsRequest {
-	return &HandleStudentsRequest{db: db}
+func NewHandlerStudent(db *sqlx.DB) *HandleStudentsRequest {
+	repo := NewStudentStore(db)
+	service := NewHandlerService(repo)
+	return &HandleStudentsRequest{
+		repo:    repo,
+		service: service,
+	}
 }
 
 // func to create a new student
@@ -104,7 +111,7 @@ func (h *HandleStudentsRequest) RegisterAsStudent_Bp(w http.ResponseWriter, r *h
 	//execute the query from student store
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.CreateNewStudent(ctx, students); err != nil {
+	if err := h.repo.CreateNewStudent(ctx, students); err != nil {
 		//logger the response error data for this method
 		logger.Log.Error("Failed to create a new students for a user!",
 			zap.String("request_id", request_id),
@@ -200,7 +207,7 @@ func (h *HandleStudentsRequest) DeleteStudent_Bp(w http.ResponseWriter, r *http.
 	//execute the query from store method!
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.DeleteStudents(uuid_user, ctx); err != nil {
+	if err := h.repo.DeleteStudents(uuid_user, ctx); err != nil {
 		//logger the data response error for this method
 		logger.Log.Error("Failed to delete the students data!",
 			zap.String("request_id", request_id),
@@ -392,7 +399,7 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 		//its gonna be replace from old path to a new path in folder students profile
 		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 		defer cancle()
-		students, err := h.db.GetStudentById(uuid_user, ctx)
+		students, err := h.repo.GetStudentById(uuid_user, ctx)
 		if err != nil {
 			//logger the response error for this method
 			logger.Log.Error("Failed to get the students id from db!",
@@ -448,7 +455,7 @@ func (h *HandleStudentsRequest) UpdateStudents_Bp(w http.ResponseWriter, r *http
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.UpdateStudentsData(uuid_user, payloads, ctx); err != nil {
+	if err := h.repo.UpdateStudentsData(uuid_user, payloads, ctx); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to update and execute the query!",
 			zap.String("request_id", request_id),
@@ -544,7 +551,7 @@ func (h *HandleStudentsRequest) GetAllStudents_Bp(w http.ResponseWriter, r *http
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	students_data, err := h.db.GetAllStudents(ctx)
+	students_data, err := h.repo.GetAllStudents(ctx)
 	if err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to get all the data of students!",
