@@ -223,13 +223,38 @@ func (s *ApiServer) Run() error {
 	students_grades_store := studentsgrades.NewHandlerStoreStudentsGrade(s.db)
 	students_grades_service := studentsgrades.NewHandlerStudentsGrade(students_grades_store)
 
-	//router for handler create a new task grade for students
+	//router for handler grades
+	// Create
 	subRouter.Handle(
 		"/grades",
 		middleware.TokenIdMiddleware(http.HandlerFunc(
 			students_grades_service.CreateNewStudentsGrade_Bp,
 		)),
 	).Methods("POST")
+
+	// Get All with task relation
+	subRouter.Handle(
+		"/grades",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			students_grades_service.GetAllStudentsGradesWithTask_Bp,
+		)),
+	).Methods("GET")
+
+	// Update
+	subRouter.Handle(
+		"/grades/{id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			students_grades_service.UpdateStudentsGrade_Bp,
+		)),
+	).Methods("PATCH")
+
+	// Delete
+	subRouter.Handle(
+		"/grades/{id}",
+		middleware.TokenIdMiddleware(http.HandlerFunc(
+			students_grades_service.DeleteStudentsGrade_Bp,
+		)),
+	).Methods("DELETE")
 
 	// Create HTTP server
 	s.server = &http.Server{

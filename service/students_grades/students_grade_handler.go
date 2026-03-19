@@ -11,6 +11,8 @@ import (
 	"github.com/ArkaniLoveCoding/Shcool-manajement/types"
 	"github.com/ArkaniLoveCoding/Shcool-manajement/utils"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
 
@@ -122,4 +124,177 @@ func (h *HanlderStudentsGrade) CreateNewStudentsGrade_Bp(w http.ResponseWriter, 
 	//return final result
 	utils.ResponseSuccess(w, http.StatusCreated, "Create a new grades has been successfully!", students_grade_response)
 
+}
+
+func (h *HanlderStudentsGrade) UpdateStudentsGrade_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		logger.Log.Info("Failed to get the request id from update func!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id!", false)
+		return
+	}
+
+	//get the role students from middlewae
+	role_grades, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		logger.Log.Error("Failed to get role for update!",
+			zap.String("request_id", request_id),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get role!", err.Error())
+		return
+	}
+	if role_grades != "guru" {
+		utils.ResponseError(w, http.StatusBadRequest, "Guru role required!", false)
+		return
+	}
+
+	//setup the params id
+	idStr := mux.Vars(r)["id"]
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		logger.Log.Error("Invalid grade ID!",
+			zap.String("request_id", request_id),
+			zap.String("id", idStr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Invalid grade ID!", err.Error())
+		return
+	}
+
+	//decode the data payload
+	var payloads types.PayloadsStudentGradeUpdate
+	if err := utils.DecodeData(r, &payloads); err != nil {
+		logger.Log.Error("Failed to decode update payload!",
+			zap.String("request_id", request_id),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to decode payload!", err.Error())
+		return
+	}
+
+	//make the validator for a payloads update
+	validate := validator.New()
+	if err := validate.Struct(&payloads); err != nil {
+		logger.Log.Error("Validation failed for update!",
+			zap.String("request_id", request_id),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Validation failed!", err.Error())
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
+	if err := h.db.UpdateStudentsGrade(ctx, id, &payloads); err != nil {
+		logger.Log.Error("Failed to update students grade!",
+			zap.String("request_id", request_id),
+			zap.String("id", id.String()),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to update grade!", err.Error())
+		return
+	}
+
+	students_grade_response := types.StudentsGradeResponse{
+		Id: id,
+	}
+
+	utils.ResponseSuccess(w, http.StatusOK, "Grade updated successfully!", students_grade_response)
+}
+
+func (h *HanlderStudentsGrade) DeleteStudentsGrade_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		logger.Log.Info("Failed to get request id for delete!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id!", false)
+		return
+	}
+
+	//get the role students from middleware
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		logger.Log.Error("Failed to get role for delete!",
+			zap.String("request_id", request_id),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get role!", err.Error())
+		return
+	}
+	if role != "guru" {
+		utils.ResponseError(w, http.StatusBadRequest, "Guru role required!", false)
+		return
+	}
+
+	//setup the params id
+	idStr := mux.Vars(r)["id"]
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		logger.Log.Error("Invalid ID for delete!",
+			zap.String("request_id", request_id),
+			zap.String("id", idStr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Invalid ID!", err.Error())
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
+
+	if err := h.db.DeleteStudentsGrade(ctx, id); err != nil {
+		logger.Log.Error("Failed to delete grade!",
+			zap.String("request_id", request_id),
+			zap.String("id", idStr),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to delete grade!", err.Error())
+		return
+	}
+
+	utils.ResponseSuccess(w, http.StatusOK, "Grade deleted successfully!", map[string]interface{}{"message": "Deleted", "id": id.String()})
+}
+
+func (h *HanlderStudentsGrade) GetAllStudentsGradesWithTask_Bp(w http.ResponseWriter, r *http.Request) {
+
+	//get the request id from middleware
+	request_id := middleware.GetRequestID(r)
+	if request_id == "" {
+		logger.Log.Info("Failed to get request id for get all!",
+			zap.String("client_ip", r.RemoteAddr),
+			zap.String("path", r.URL.Path),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get request id!", false)
+		return
+	}
+
+	//get the role students from middleware
+	role, err := middleware.GetRoleMiddleware(w, r)
+	if err != nil {
+		logger.Log.Error("Failed to get role for get all!",
+			zap.String("request_id", request_id),
+		)
+		utils.ResponseError(w, http.StatusBadRequest, "Failed to get role!", err.Error())
+		return
+	}
+	if role != "guru" {
+		utils.ResponseError(w, http.StatusBadRequest, "Guru role required!", false)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
+
+	grades, err := h.db.GetAllStudentsGradesWithTask(ctx)
+	if err != nil {
+		logger.Log.Error("Failed to get all grades!",
+			zap.String("request_id", request_id),
+		)
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed to get grades!", err.Error())
+		return
+	}
+
+	utils.ResponseSuccess(w, http.StatusOK, "Grades retrieved successfully!", grades)
 }
