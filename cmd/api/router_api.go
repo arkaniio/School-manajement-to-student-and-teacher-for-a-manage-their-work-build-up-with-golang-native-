@@ -54,8 +54,7 @@ func (s *ApiServer) Run() error {
 	})
 
 	// The router for the services
-	userStore := serviceUser.NewStore(s.db)
-	userService := serviceUser.NewHandlerUser(userStore)
+	userService := serviceUser.NewHandlerUser(s.db)
 
 	// Router for the register user
 	subRouter.Handle(
@@ -139,8 +138,7 @@ func (s *ApiServer) Run() error {
 	).Methods("GET")
 
 	//service for a task
-	taskStore := tasks.NewTaskStore(s.db)
-	taskService := tasks.NewHandlerTask(taskStore)
+	taskService := tasks.NewHandlerTask(s.db)
 
 	//router for create a new task
 	subRouter.Handle(
@@ -240,8 +238,7 @@ func (s *ApiServer) Run() error {
 	).Methods("PATCH")
 
 	//students grade service and handler
-	students_grades_store := studentsgrades.NewHandlerStoreStudentsGrade(s.db)
-	students_grades_service := studentsgrades.NewHandlerStudentsGrade(students_grades_store)
+	students_grades_service := studentsgrades.NewHandlerStudentsGrade(s.db)
 
 	//router for handler grades
 	// Create

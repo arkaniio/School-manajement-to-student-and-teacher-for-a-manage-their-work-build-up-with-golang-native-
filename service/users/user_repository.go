@@ -23,7 +23,7 @@ func NewStore(store *sqlx.DB) *Store {
 	return &Store{store: store}
 }
 
-//func get user by email and username 
+// func get user by email and username
 func (s *Store) GetUserByEmailAndUsername(email string, username string) (*types.User, error) {
 
 	//declare the user
@@ -47,17 +47,17 @@ func (s *Store) GetUserByEmailAndUsername(email string, username string) (*types
 	return &user, nil
 }
 
-//func create a new user
-func (s *Store) CreateUser(ctx context.Context, user *types.User) error  {
+// func create a new user
+func (s *Store) CreateUser(ctx context.Context, user *types.User) error {
 
 	//use transactions options
 	tx_options := &sql.TxOptions{
 		Isolation: sql.LevelSerializable,
-		ReadOnly: false,
+		ReadOnly:  false,
 	}
 
 	//declare the context for setup base query
-	ctx, cancle := context.WithTimeout(context.Background(), time.Second * 10)
+	ctx, cancle := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancle()
 
 	//setup the transaction
@@ -66,7 +66,7 @@ func (s *Store) CreateUser(ctx context.Context, user *types.User) error  {
 		return errors.New("Failed to doing transactions!")
 	}
 	defer tx.Rollback()
-	
+
 	//base query
 	query := `
 		INSERT INTO users (id, username, email, password, profile_image, role, created_at, updated_at)
@@ -95,7 +95,7 @@ func (s *Store) CreateUser(ctx context.Context, user *types.User) error  {
 		&user.Role,
 		&user.Created_at,
 		&user.Updated_at,
-		); err != nil {
+	); err != nil {
 		return nil
 	}
 
@@ -107,21 +107,21 @@ func (s *Store) CreateUser(ctx context.Context, user *types.User) error  {
 	return nil
 }
 
-//func update the users identity
+// func update the users identity
 func (s *Store) UpdateDataUser(
-	id uuid.UUID, 
-	ctx context.Context, 
+	id uuid.UUID,
+	ctx context.Context,
 	payload types.Update,
-	) error {
+) error {
 
 	//settings the options for a transaction
 	tx_options := &sql.TxOptions{
 		Isolation: sql.LevelSerializable,
-		ReadOnly: false,
+		ReadOnly:  false,
 	}
 
 	//declare the context for a query
-	ctx, cancle := context.WithTimeout(context.Background(), time.Second * 10)
+	ctx, cancle := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancle()
 
 	//setup the transaction
@@ -132,7 +132,7 @@ func (s *Store) UpdateDataUser(
 	defer tx.Rollback()
 
 	//setup the args and args id
-	var	settings []string
+	var settings []string
 	argsId := 1
 	var args []interface{}
 
@@ -150,7 +150,7 @@ func (s *Store) UpdateDataUser(
 		argsId++
 	}
 
-	//if the users wants to update their password 
+	//if the users wants to update their password
 	if payload.Password != nil {
 		hash_password, err := utils.HashPassword(*payload.Password)
 		if err != nil {
@@ -187,8 +187,8 @@ func (s *Store) UpdateDataUser(
 	if err != nil {
 		return errors.New(err.Error())
 	}
-	
-	//checking the rows of the db 
+
+	//checking the rows of the db
 	result, err := rows.RowsAffected()
 	if err != nil {
 		return errors.New("No one changes in db, error: " + err.Error())
@@ -206,8 +206,8 @@ func (s *Store) UpdateDataUser(
 
 }
 
-//func get user by id
-func (s *Store) GetUserById(id uuid.UUID) (*types.User, error) {
+// func get user by id
+func (s *Store) GetUserById(id uuid.UUID, ctx context.Context) (*types.User, error) {
 
 	//declare the user
 	var users types.User
@@ -222,7 +222,7 @@ func (s *Store) GetUserById(id uuid.UUID) (*types.User, error) {
 	}
 
 	//second base query
-	if err := s.store.Get(&users, query, id); err != nil {
+	if err := s.store.GetContext(ctx, &users, query, id); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("Failed to get the data because is nil!")
 		}

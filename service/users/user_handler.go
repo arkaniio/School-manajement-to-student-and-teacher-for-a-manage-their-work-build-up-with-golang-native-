@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 
 	"github.com/ArkaniLoveCoding/Shcool-manajement/middleware"
@@ -22,11 +23,17 @@ import (
 
 // this is for router that token is not verified in their function!
 type HandleRequest struct {
-	db types.UserStore
+	repo    types.UserStore
+	service *ServiceUser
 }
 
-func NewHandlerUser(db types.UserStore) *HandleRequest {
-	return &HandleRequest{db: db}
+func NewHandlerUser(db *sqlx.DB) *HandleRequest {
+	repo := NewStore(db)
+	service := NewServiceUser(repo)
+	return &HandleRequest{
+		repo:    repo,
+		service: service,
+	}
 }
 
 // controler that take the services on it
@@ -86,7 +93,7 @@ func (h *HandleRequest) Register_Bp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate if the email and username has been already exist
-	users, err := h.db.GetUserByEmailAndUsername(payload.Email, payload.Username)
+	users, err := h.repo.GetUserByEmailAndUsername(payload.Email, payload.Username)
 	if err != nil {
 		//logger the data response if get user by username and by email is vailed!
 		logger.Log.Error("Failed to get the username and email",
@@ -134,7 +141,7 @@ func (h *HandleRequest) Register_Bp(w http.ResponseWriter, r *http.Request) {
 	defer cancle()
 
 	//execute the query
-	if err := h.db.CreateUser(ctx, final_payload); err != nil {
+	if err := h.repo.CreateUser(ctx, final_payload); err != nil {
 		//logger the data response if create user is failed
 		logger.Log.Error("Failed to create new user",
 			zap.String("request_id", requestID),
@@ -217,7 +224,7 @@ func (h *HandleRequest) Login_Bp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//check the email and username (exist or not found)
-	users, err := h.db.GetUserByEmailAndUsername(payload.Email, payload.Username)
+	users, err := h.repo.GetUserByEmailAndUsername(payload.Email, payload.Username)
 	if err != nil {
 		//logger the data response if failed to get email and username by users
 		logger.Log.Error("Failed to get user by username and email",
@@ -305,7 +312,9 @@ func (h *HandleRequest) Profile_Bp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//settings the query from store
-	users, err := h.db.GetUserById(user_id)
+	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancle()
+	users, err := h.repo.GetUserById(user_id, ctx)
 	if err != nil {
 		//logger the data response if get user by id is failed
 		logger.Log.Error("Failed to get user by id!",
@@ -467,7 +476,9 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 			utils.ResponseError(w, http.StatusBadRequest, "Failed to copy the data because the length of the data is 0", false)
 			return
 		}
-		users_profile_image, err := h.db.GetUserById(user_id)
+		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
+		defer cancle()
+		users_profile_image, err := h.repo.GetUserById(user_id, ctx)
 		if err != nil {
 			//logger the data response if users is failed
 			logger.Log.Error("Failed because id is invalid!",
@@ -518,7 +529,7 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 	//settings the context and setup the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.UpdateDataUser(user_id, ctx, payload); err != nil {
+	if err := h.repo.UpdateDataUser(user_id, ctx, payload); err != nil {
 		//logger the data response if the update data is failed
 		logger.Log.Error("Failed because the id or data is invalid!!",
 			zap.String("request_id", requestID),
@@ -529,7 +540,7 @@ func (h *HandleRequest) Update_Bp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//get the user data in db
-	users, err := h.db.GetUserById(user_id)
+	users, err := h.repo.GetUserById(user_id, ctx)
 	if err != nil {
 		//logger the data response if the id is invalid
 		logger.Log.Error("Failed because the id is invalid!",
