@@ -15,16 +15,23 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
 type HandleTaskRequest struct {
-	db types.TaskStore
+	repo    types.TaskStore
+	service *ServiceTask
 }
 
 // make func to handler the request for every single method in this task table
-func NewHandlerTask(db types.TaskStore) *HandleTaskRequest {
-	return &HandleTaskRequest{db: db}
+func NewHandlerTask(db *sqlx.DB) *HandleTaskRequest {
+	repo := NewTaskStore(db)
+	service := NewServiceTask(repo)
+	return &HandleTaskRequest{
+		repo:    repo,
+		service: service,
+	}
 }
 
 // func to create a new task for a student
@@ -234,7 +241,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	//execute the query from task store
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.CreateNewTasks(ctx, tasks); err != nil {
+	if err := h.repo.CreateNewTasks(ctx, tasks); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to create a new task!",
 			zap.String("request_id", request_id),
@@ -247,7 +254,7 @@ func (h *HandleTaskRequest) Create_TaskBp(w http.ResponseWriter, r *http.Request
 	//validate the task file
 	ctx_id, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	task_data, err := h.db.GetTaskById(tasks.Id, ctx_id)
+	task_data, err := h.repo.GetTaskById(tasks.Id, ctx_id)
 	if err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to get tasks data by id!",
@@ -396,7 +403,7 @@ func (h *HandleTaskRequest) Delete_Bp(w http.ResponseWriter, r *http.Request) {
 	//execute the query for this method
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.DeleteTask(task_id_fix, ctx); err != nil {
+	if err := h.repo.DeleteTask(task_id_fix, ctx); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to delete the task by id!",
 			zap.String("request_id", request_id),
@@ -574,7 +581,7 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 		//it could be more efficient for a memory in database and our systems
 		ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 		defer cancle()
-		task_file_data, err := h.db.GetTaskById(task_id_fix, ctx)
+		task_file_data, err := h.repo.GetTaskById(task_id_fix, ctx)
 		if err != nil {
 			//logger the response error for this method
 			logger.Log.Error("Failed to get the task data from task table by id!",
@@ -619,7 +626,7 @@ func (h *HandleTaskRequest) UpdateTask_Bp(w http.ResponseWriter, r *http.Request
 	//execute the methods from store
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	if err := h.db.UpdateTask(task_id_fix, ctx, payloads); err != nil {
+	if err := h.repo.UpdateTask(task_id_fix, ctx, payloads); err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to update the task!",
 			zap.String("request_id", request_id),
@@ -696,7 +703,7 @@ func (h *HandleTaskRequest) GetByIdIncludeStudents_Bp(w http.ResponseWriter, r *
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	tasks_data, err := h.db.GetTaskByIdIncludeStudents(task_id_fix, ctx)
+	tasks_data, err := h.repo.GetTaskByIdIncludeStudents(task_id_fix, ctx)
 	if err != nil {
 		//logger the responnse error for this method
 		logger.Log.Error("Failed to get the task data for this method!",
@@ -746,7 +753,7 @@ func (h *HandleTaskRequest) GetAllTaskIncludeStudents_Bp(w http.ResponseWriter, 
 	//execute the query
 	ctx, cancle := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancle()
-	tasks_data, err := h.db.GetAllTaskIncludeStudents(ctx)
+	tasks_data, err := h.repo.GetAllTaskIncludeStudents(ctx)
 	if err != nil {
 		//logger the response error for this method
 		logger.Log.Error("Failed to get the tasks data!",
