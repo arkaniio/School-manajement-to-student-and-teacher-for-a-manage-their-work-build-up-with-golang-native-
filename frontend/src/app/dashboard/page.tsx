@@ -174,7 +174,7 @@ export default function DashboardPage() {
           ) : (
             <div className="p-6 md:p-8 space-y-3">
               {tasksData.slice(0, 5).map((task: any, i: number) => (
-                <div key={i} className="flex items-center gap-4 md:gap-6 px-5 py-4 md:py-5 rounded-2xl transition-all bg-white/[.01] border border-white/5 hover:bg-white/[.03] hover:border-white/10 hover:shadow-lg group">
+                <div key={i} className="flex items-center gap-4 md:gap-6 px-5 py-4 md:py-5 rounded-2xl transition-all bg-white/1 border border-white/5 hover:bg-white/3 hover:border-white/10 hover:shadow-lg group">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-black text-white shadow-inner"
                     style={{ background: `hsl(${(i * 60 + 240) % 360},70%,50%)`, opacity: 0.85 }}>{i + 1}</div>
                   <div className="flex-1 min-w-0 space-y-1">
