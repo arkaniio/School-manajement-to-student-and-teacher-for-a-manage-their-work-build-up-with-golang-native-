@@ -1,0 +1,253 @@
+﻿src/app/login/page.tsx(38,20): error TS1127: Invalid character.
+src/app/login/page.tsx(38,21): error TS1003: Identifier expected.
+src/app/login/page.tsx(38,57): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(39,12): error TS1005: ';' expected.
+src/app/login/page.tsx(39,22): error TS1127: Invalid character.
+src/app/login/page.tsx(39,197): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(40,14): error TS1005: ';' expected.
+src/app/login/page.tsx(40,24): error TS1127: Invalid character.
+src/app/login/page.tsx(40,184): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(41,14): error TS1005: ';' expected.
+src/app/login/page.tsx(41,24): error TS1127: Invalid character.
+src/app/login/page.tsx(41,196): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(42,14): error TS1005: ';' expected.
+src/app/login/page.tsx(42,24): error TS1127: Invalid character.
+src/app/login/page.tsx(42,198): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(43,14): error TS1005: ';' expected.
+src/app/login/page.tsx(43,24): error TS1127: Invalid character.
+src/app/login/page.tsx(43,169): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(44,14): error TS1005: ';' expected.
+src/app/login/page.tsx(44,24): error TS1127: Invalid character.
+src/app/login/page.tsx(44,74): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(45,16): error TS1005: ';' expected.
+src/app/login/page.tsx(45,26): error TS1127: Invalid character.
+src/app/login/page.tsx(45,58): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(46,18): error TS1005: ';' expected.
+src/app/login/page.tsx(46,28): error TS1127: Invalid character.
+src/app/login/page.tsx(46,157): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(47,30): error TS1005: ';' expected.
+src/app/login/page.tsx(47,38): error TS1005: ':' expected.
+src/app/login/page.tsx(47,40): error TS1005: ';' expected.
+src/app/login/page.tsx(47,50): error TS1127: Invalid character.
+src/app/login/page.tsx(47,72): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(48,13): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(49,28): error TS1127: Invalid character.
+src/app/login/page.tsx(49,29): error TS1003: Identifier expected.
+src/app/login/page.tsx(49,100): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(50,11): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(51,25): error TS1127: Invalid character.
+src/app/login/page.tsx(51,26): error TS1003: Identifier expected.
+src/app/login/page.tsx(51,87): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(52,13): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(52,35): error TS1109: Expression expected.
+src/app/login/page.tsx(53,29): error TS1127: Invalid character.
+src/app/login/page.tsx(53,30): error TS1003: Identifier expected.
+src/app/login/page.tsx(53,62): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(54,11): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(55,24): error TS1127: Invalid character.
+src/app/login/page.tsx(55,25): error TS1003: Identifier expected.
+src/app/login/page.tsx(55,86): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(56,13): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(56,52): error TS1005: ';' expected.
+src/app/login/page.tsx(56,68): error TS1127: Invalid character.
+src/app/login/page.tsx(56,81): error TS1005: ';' expected.
+src/app/login/page.tsx(57,11): error TS1003: Identifier expected.
+src/app/login/page.tsx(58,26): error TS1127: Invalid character.
+src/app/login/page.tsx(58,27): error TS1003: Identifier expected.
+src/app/login/page.tsx(58,66): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(60,39): error TS1127: Invalid character.
+src/app/login/page.tsx(60,40): error TS1003: Identifier expected.
+src/app/login/page.tsx(60,149): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(61,17): error TS1005: ',' expected.
+src/app/login/page.tsx(62,15): error TS1005: ',' expected.
+src/app/login/page.tsx(63,13): error TS1109: Expression expected.
+src/app/login/page.tsx(63,14): error TS1005: ';' expected.
+src/app/login/page.tsx(64,11): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(65,9): error TS1109: Expression expected.
+src/app/login/page.tsx(66,7): error TS1109: Expression expected.
+src/app/login/page.tsx(68,22): error TS1127: Invalid character.
+src/app/login/page.tsx(68,23): error TS1003: Identifier expected.
+src/app/login/page.tsx(68,92): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(69,14): error TS1005: ';' expected.
+src/app/login/page.tsx(69,24): error TS1127: Invalid character.
+src/app/login/page.tsx(69,63): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(70,16): error TS1005: ';' expected.
+src/app/login/page.tsx(70,26): error TS1127: Invalid character.
+src/app/login/page.tsx(70,66): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(71,18): error TS1005: ';' expected.
+src/app/login/page.tsx(71,28): error TS1127: Invalid character.
+src/app/login/page.tsx(71,111): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(72,25): error TS1005: ';' expected.
+src/app/login/page.tsx(72,33): error TS1005: ':' expected.
+src/app/login/page.tsx(72,35): error TS1005: ';' expected.
+src/app/login/page.tsx(72,45): error TS1127: Invalid character.
+src/app/login/page.tsx(72,62): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(73,13): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(74,11): error TS1109: Expression expected.
+src/app/login/page.tsx(75,26): error TS1127: Invalid character.
+src/app/login/page.tsx(75,27): error TS1003: Identifier expected.
+src/app/login/page.tsx(75,36): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(76,17): error TS1005: ';' expected.
+src/app/login/page.tsx(76,27): error TS1127: Invalid character.
+src/app/login/page.tsx(76,102): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(77,16): error TS1005: ';' expected.
+src/app/login/page.tsx(77,26): error TS1127: Invalid character.
+src/app/login/page.tsx(77,97): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(78,11): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(79,26): error TS1127: Invalid character.
+src/app/login/page.tsx(79,27): error TS1003: Identifier expected.
+src/app/login/page.tsx(79,90): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(81,30): error TS1127: Invalid character.
+src/app/login/page.tsx(81,31): error TS1003: Identifier expected.
+src/app/login/page.tsx(81,132): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(82,23): error TS1005: ';' expected.
+src/app/login/page.tsx(82,33): error TS1127: Invalid character.
+src/app/login/page.tsx(82,66): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(83,15): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(84,13): error TS1109: Expression expected.
+src/app/login/page.tsx(85,52): error TS1127: Invalid character.
+src/app/login/page.tsx(85,53): error TS1003: Identifier expected.
+src/app/login/page.tsx(85,67): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(87,34): error TS1127: Invalid character.
+src/app/login/page.tsx(87,35): error TS1003: Identifier expected.
+src/app/login/page.tsx(87,103): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(88,22): error TS1005: ';' expected.
+src/app/login/page.tsx(88,32): error TS1127: Invalid character.
+src/app/login/page.tsx(88,45): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(89,25): error TS1005: ';' expected.
+src/app/login/page.tsx(89,33): error TS1005: ':' expected.
+src/app/login/page.tsx(89,35): error TS1005: ';' expected.
+src/app/login/page.tsx(89,45): error TS1127: Invalid character.
+src/app/login/page.tsx(89,107): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(91,26): error TS1127: Invalid character.
+src/app/login/page.tsx(91,34): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(93,33): error TS1005: ',' expected.
+src/app/login/page.tsx(93,49): error TS1005: ',' expected.
+src/app/login/page.tsx(93,62): error TS1005: ',' expected.
+src/app/login/page.tsx(94,33): error TS1127: Invalid character.
+src/app/login/page.tsx(94,44): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(96,31): error TS1127: Invalid character.
+src/app/login/page.tsx(96,273): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(97,20): error TS1109: Expression expected.
+src/app/login/page.tsx(98,17): error TS1109: Expression expected.
+src/app/login/page.tsx(99,15): error TS1109: Expression expected.
+src/app/login/page.tsx(100,15): error TS2657: JSX expressions must have one parent element.
+src/app/login/page.tsx(101,34): error TS1127: Invalid character.
+src/app/login/page.tsx(101,86): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/login/page.tsx(101,102): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/app/login/page.tsx(102,32): error TS1127: Invalid character.
+src/app/login/page.tsx(102,33): error TS1003: Identifier expected.
+src/app/login/page.tsx(102,33): error TS1005: ';' expected.
+src/app/login/page.tsx(102,45): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(103,25): error TS1005: ';' expected.
+src/app/login/page.tsx(103,33): error TS1005: ':' expected.
+src/app/login/page.tsx(103,35): error TS1005: ';' expected.
+src/app/login/page.tsx(103,45): error TS1127: Invalid character.
+src/app/login/page.tsx(103,107): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(105,26): error TS1127: Invalid character.
+src/app/login/page.tsx(105,35): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(107,33): error TS1005: ',' expected.
+src/app/login/page.tsx(107,46): error TS1005: ',' expected.
+src/app/login/page.tsx(107,59): error TS1005: ',' expected.
+src/app/login/page.tsx(108,33): error TS1127: Invalid character.
+src/app/login/page.tsx(108,52): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(110,31): error TS1127: Invalid character.
+src/app/login/page.tsx(110,273): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(111,20): error TS1109: Expression expected.
+src/app/login/page.tsx(112,17): error TS1109: Expression expected.
+src/app/login/page.tsx(113,15): error TS1109: Expression expected.
+src/app/login/page.tsx(115,32): error TS1127: Invalid character.
+src/app/login/page.tsx(115,75): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/login/page.tsx(116,36): error TS1127: Invalid character.
+src/app/login/page.tsx(116,82): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/login/page.tsx(116,93): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/app/login/page.tsx(117,17): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(118,32): error TS1127: Invalid character.
+src/app/login/page.tsx(118,33): error TS1003: Identifier expected.
+src/app/login/page.tsx(118,45): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(119,25): error TS1005: ';' expected.
+src/app/login/page.tsx(119,33): error TS1005: ':' expected.
+src/app/login/page.tsx(119,35): error TS1005: ';' expected.
+src/app/login/page.tsx(119,45): error TS1127: Invalid character.
+src/app/login/page.tsx(119,107): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(121,42): error TS1005: ',' expected.
+src/app/login/page.tsx(123,33): error TS1005: ',' expected.
+src/app/login/page.tsx(123,49): error TS1005: ',' expected.
+src/app/login/page.tsx(123,62): error TS1005: ',' expected.
+src/app/login/page.tsx(124,33): error TS1127: Invalid character.
+src/app/login/page.tsx(124,45): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(126,31): error TS1127: Invalid character.
+src/app/login/page.tsx(126,274): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(127,20): error TS1109: Expression expected.
+src/app/login/page.tsx(129,26): error TS1127: Invalid character.
+src/app/login/page.tsx(129,27): error TS1003: Identifier expected.
+src/app/login/page.tsx(129,36): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(130,30): error TS1136: Property assignment expected.
+src/app/login/page.tsx(130,33): error TS1005: ';' expected.
+src/app/login/page.tsx(131,31): error TS1127: Invalid character.
+src/app/login/page.tsx(131,130): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(133,45): error TS1005: ',' expected.
+src/app/login/page.tsx(133,55): error TS1005: ',' expected.
+src/app/login/page.tsx(133,56): error TS1109: Expression expected.
+src/app/login/page.tsx(133,58): error TS1109: Expression expected.
+src/app/login/page.tsx(133,77): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(134,19): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(135,17): error TS1109: Expression expected.
+src/app/login/page.tsx(136,15): error TS1109: Expression expected.
+src/app/login/page.tsx(138,22): error TS1127: Invalid character.
+src/app/login/page.tsx(138,23): error TS1003: Identifier expected.
+src/app/login/page.tsx(138,32): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(140,27): error TS1127: Invalid character.
+src/app/login/page.tsx(140,193): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(141,24): error TS1136: Property assignment expected.
+src/app/login/page.tsx(141,107): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(142,15): error TS1109: Expression expected.
+src/app/login/page.tsx(144,19): error TS1003: Identifier expected.
+src/app/login/page.tsx(144,25): error TS1005: ',' expected.
+src/app/login/page.tsx(144,35): error TS1127: Invalid character.
+src/app/login/page.tsx(144,36): error TS1003: Identifier expected.
+src/app/login/page.tsx(144,78): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(145,21): error TS1003: Identifier expected.
+src/app/login/page.tsx(145,26): error TS1005: ',' expected.
+src/app/login/page.tsx(145,36): error TS1127: Invalid character.
+src/app/login/page.tsx(145,37): error TS1003: Identifier expected.
+src/app/login/page.tsx(145,97): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(146,23): error TS1003: Identifier expected.
+src/app/login/page.tsx(146,31): error TS1005: ',' expected.
+src/app/login/page.tsx(146,41): error TS1127: Invalid character.
+src/app/login/page.tsx(146,42): error TS1003: Identifier expected.
+src/app/login/page.tsx(146,129): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(147,23): error TS1003: Identifier expected.
+src/app/login/page.tsx(147,29): error TS1005: ',' expected.
+src/app/login/page.tsx(147,39): error TS1127: Invalid character.
+src/app/login/page.tsx(147,40): error TS1003: Identifier expected.
+src/app/login/page.tsx(147,107): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(148,21): error TS1138: Parameter declaration expected.
+src/app/login/page.tsx(148,26): error TS1005: ',' expected.
+src/app/login/page.tsx(149,31): error TS1109: Expression expected.
+src/app/login/page.tsx(150,19): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(151,17): error TS1109: Expression expected.
+src/app/login/page.tsx(151,19): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(151,32): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(152,15): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(153,13): error TS1109: Expression expected.
+src/app/login/page.tsx(154,11): error TS1109: Expression expected.
+src/app/login/page.tsx(155,24): error TS1127: Invalid character.
+src/app/login/page.tsx(155,25): error TS1003: Identifier expected.
+src/app/login/page.tsx(155,69): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(156,22): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(156,24): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(156,29): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(156,44): error TS1005: ':' expected.
+src/app/login/page.tsx(157,19): error TS1005: ':' expected.
+src/app/login/page.tsx(157,24): error TS1127: Invalid character.
+src/app/login/page.tsx(157,138): error TS1002: Unterminated string literal.
+src/app/login/page.tsx(158,15): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(158,22): error TS1434: Unexpected keyword or identifier.
+src/app/login/page.tsx(159,13): error TS1128: Declaration or statement expected.
+src/app/login/page.tsx(160,11): error TS1109: Expression expected.
+src/app/login/page.tsx(161,9): error TS1109: Expression expected.
+src/app/login/page.tsx(162,7): error TS1109: Expression expected.
+src/app/login/page.tsx(163,5): error TS1109: Expression expected.
+src/app/login/page.tsx(164,3): error TS1109: Expression expected.
+src/app/login/page.tsx(165,1): error TS1128: Declaration or statement expected.
