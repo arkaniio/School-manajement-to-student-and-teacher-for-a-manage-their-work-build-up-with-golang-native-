@@ -99,3 +99,7 @@ func (ms *MemoryStore) revictDeleteData(interval_duration time.Duration) {
 	}
 
 }
+
+func (ms *MemoryStore) Stop() {
+	close(ms.stopCH)
+}
