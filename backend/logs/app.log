@@ -3358,3 +3358,35 @@
 2026-03-20T21:31:59.026+0800	[31mERROR[0m	runtime/asm_amd64.s:1771	Server error	{"error": "http: Server closed"}
 2026-03-20T21:31:59.026+0800	[34mINFO[0m	runtime/proc.go:290	Server exited properly
 2026-03-20T21:31:59.026+0800	[34mINFO[0m	cmd/main.go:108	Closing database connection...
+2026-03-20T21:53:32.814+0800	[34mINFO[0m	runtime/proc.go:290	Starting application...
+2026-03-20T21:53:32.829+0800	[34mINFO[0m	runtime/proc.go:290	Connecting to PostgreSQL database...
+2026-03-20T21:53:32.868+0800	[34mINFO[0m	runtime/proc.go:290	Database connected successfully	{"database": "School-manajement"}
+2026-03-20T21:53:32.868+0800	[34mINFO[0m	runtime/asm_amd64.s:1771	Starting server	{"port": ":8080"}
+2026-03-20T21:53:52.891+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0034841}
+2026-03-20T21:53:52.894+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0010532}
+2026-03-20T21:53:55.917+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0013093}
+2026-03-20T21:53:55.921+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0014761}
+2026-03-20T21:54:00.467+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0019312}
+2026-03-20T21:54:02.315+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0010648}
+2026-03-20T21:54:02.317+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0010495}
+2026-03-20T21:54:02.720+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0010288}
+2026-03-20T21:54:02.722+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0006159}
+2026-03-20T21:54:03.134+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0019912}
+2026-03-20T21:54:03.138+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0019784}
+2026-03-20T21:54:03.174+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/absensi/all-with-students", "ip": "[::1]:59502", "status": 200, "duration": 0.0424421}
+2026-03-20T21:54:03.178+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/absensi/all-with-students", "ip": "[::1]:59502", "status": 200, "duration": 0.0018916}
+2026-03-20T21:54:03.979+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:59502", "status": 200, "duration": 0.0013038}
+2026-03-20T21:54:03.982+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:59502", "status": 200, "duration": 0.001468}
+2026-03-20T21:54:04.564+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/absensi/all-with-students", "ip": "[::1]:59502", "status": 200, "duration": 0.0012979}
+2026-03-20T21:54:04.564+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0012979}
+2026-03-20T21:54:04.568+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/absensi/all-with-students", "ip": "[::1]:59502", "status": 200, "duration": 0.0010757}
+2026-03-20T21:54:04.569+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0012514}
+2026-03-20T21:54:05.443+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0010411}
+2026-03-20T21:54:05.445+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.001039}
+2026-03-20T21:54:10.229+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0015657}
+2026-03-20T21:54:11.512+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0025292}
+2026-03-20T21:54:11.520+0800	[34mINFO[0m	http/server.go:2286	HTTP Request completed	{"method": "GET", "path": "/api/v1/students", "ip": "[::1]:50735", "status": 200, "duration": 0.0012135}
+2026-03-20T21:54:46.542+0800	[34mINFO[0m	runtime/proc.go:290	Shutting down server...
+2026-03-20T21:54:46.543+0800	[31mERROR[0m	runtime/asm_amd64.s:1771	Server error	{"error": "http: Server closed"}
+2026-03-20T21:54:46.543+0800	[34mINFO[0m	runtime/proc.go:290	Server exited properly
+2026-03-20T21:54:46.547+0800	[34mINFO[0m	cmd/main.go:108	Closing database connection...
